@@ -1,4 +1,4 @@
-package model.enums;
+package enums;
 
 /**
  * Enumeration representing the different engineering branches at UTBM.

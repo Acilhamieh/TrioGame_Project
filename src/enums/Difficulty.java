@@ -1,4 +1,4 @@
-package model.enums;
+package enums;
 
 /**
  * Enumeration representing the three difficulty levels in the game.

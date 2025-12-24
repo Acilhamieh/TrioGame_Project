@@ -1,4 +1,4 @@
-package model.enums;
+package enums;
 
 /**
  * Enumeration representing the four game modes in Trio_UTBM.
