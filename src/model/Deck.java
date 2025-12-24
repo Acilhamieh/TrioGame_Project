@@ -37,7 +37,8 @@ public class Deck {
         // Computer Science courses (3 cards each)
         addCourseCards("SY41", Branch.COMPUTER_SCIENCE, 3);
         addCourseCards("IA41", Branch.COMPUTER_SCIENCE, 3);
-        addCourseCards("LO43", Branch.COMPUTER_SCIENCE, 3);
+        addCourseCards("SY48", Branch.COMPUTER_SCIENCE, 3);
+        addCourseCards("AP4B", Branch.COMPUTER_SCIENCE, 3);
 
         // Industrial Engineering courses (3 cards each)
         addCourseCards("GI40", Branch.INDUSTRIAL_ENGINEERING, 3);
