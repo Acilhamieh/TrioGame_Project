@@ -1,7 +1,7 @@
 package model;
 
-import model.enums.Difficulty;
-import model.enums.GameMode;
+import enums.Difficulty;
+import enums.GameMode;
 import java.util.ArrayList;
 import java.util.List;
 

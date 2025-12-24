@@ -1,7 +1,7 @@
 package model;
 
-import model.enums.Branch;
-import model.enums.GameMode;
+import enums.Branch;
+import enums.GameMode;
 
 /**
  * Represents a trio of three matching cards in Trio_UTBM.

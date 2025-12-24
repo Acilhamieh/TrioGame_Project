@@ -1,7 +1,7 @@
 package model;
 
-import model.enums.Branch;
-import model.enums.Difficulty;
+import enums.Branch;
+import enums.Difficulty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

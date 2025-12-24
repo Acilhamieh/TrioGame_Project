@@ -1,6 +1,6 @@
 package model;
 
-import model.enums.Branch;
+import enums.Branch;
 
 /**
  * Represents a course credit card in the Trio_UTBM game.
