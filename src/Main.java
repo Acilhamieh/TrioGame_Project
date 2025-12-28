@@ -1,17 +1,50 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import view.console.ConsoleView;
+
+/**
+ * Main entry point for Trio_UTBM game.
+ * Launches the console interface.
+ *
+ * @author Dana SLEIMAN, Acil HAMIEH
+ * @version 1.0
+ */
 public class Main {
+
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome acil and dana !");
-        System.out.printf("Hello and welcome israa!");
+        // Display startup banner
+        displayStartupBanner();
 
+        // Launch console view
+        ConsoleView consoleView = new ConsoleView();
+        consoleView.start();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        System.out.println("Goodbye! 👋\n");
+    }
+
+    /**
+     * Display startup banner
+     */
+    private static void displayStartupBanner() {
+        System.out.println("\n");
+        System.out.println("╔══════════════════════════════════════════════════════════╗");
+        System.out.println("║                                                          ║");
+        System.out.println("║                  ████████╗██████╗ ██╗ ██████╗            ║");
+        System.out.println("║                  ╚══██╔══╝██╔══██╗██║██╔═══██╗           ║");
+        System.out.println("║                     ██║   ██████╔╝██║██║   ██║           ║");
+        System.out.println("║                     ██║   ██╔══██╗██║██║   ██║           ║");
+        System.out.println("║                     ██║   ██║  ██║██║╚██████╔╝           ║");
+        System.out.println("║                     ╚═╝   ╚═╝  ╚═╝╚═╝ ╚═════╝            ║");
+        System.out.println("║                                                          ║");
+        System.out.println("║                        UTBM Edition                      ║");
+        System.out.println("║                                                          ║");
+        System.out.println("║              Graduate by Forming Course Trios!          ║");
+        System.out.println("║                                                          ║");
+        System.out.println("║                    Developed by:                         ║");
+        System.out.println("║                 Dana SLEIMAN & Acil HAMIEH               ║");
+        System.out.println("║                                                          ║");
+        System.out.println("║                    Course: AP4B                          ║");
+        System.out.println("║                      UTBM 2024                           ║");
+        System.out.println("║                                                          ║");
+        System.out.println("╚══════════════════════════════════════════════════════════╝");
+        System.out.println();
     }
 }
