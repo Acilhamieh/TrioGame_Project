@@ -167,13 +167,21 @@ public class MainWindow extends JFrame {
                 "Be the first to earn 6 ECTS credits by forming trios!\n\n" +
                 "🎴 WHAT IS A TRIO?\n" +
                 "Three cards with the SAME course code\n\n" +
+                "👥 NUMBER OF PLAYERS:\n" +
+                "• 2-6 players\n" +
+                "• Team mode requires even number (2, 4, or 6)\n\n" +
                 "📚 GAME MODES:\n" +
-                "• Simple Mode: Any 3 matching cards = 2 ECTS\n" +
-                "• Advanced Mode: 3 matching cards from same branch = 3 ECTS\n\n" +
-                "👥 TEAM MODE:\n" +
-                "• Play in teams of 2\n" +
-                "• Share ECTS credits\n" +
-                "• First team to 6 ECTS wins!\n\n" +
+                "• Individual: Play alone\n" +
+                "• Teams: Play in teams of 2 (pairs chosen in order)\n\n" +
+                "⚙️  DIFFICULTY LEVELS:\n" +
+                "• Simple: Any 3 matching cards = 2 ECTS\n" +
+                "• Advanced: 3 matching cards from same branch = 3 ECTS\n\n" +
+                "🏫 BRANCHES:\n" +
+                "• 💻 Computer Science (CS)\n" +
+                "• 🏭 Industrial Engineering (IE)\n" +
+                "• ⚙️ Mechanical Engineering (ME)\n" +
+                "• ⚡ Energy Engineering (EE)\n" +
+                "• ⭐ PFE (Special)\n\n" +
                 "⭐ SPECIAL:\n" +
                 "• PFE Trio (3 PFE cards) = 6 ECTS = Instant Win!\n\n" +
                 "🔄 HOW TO PLAY:\n" +
@@ -183,7 +191,7 @@ public class MainWindow extends JFrame {
                 "4. If valid trio → Earn ECTS + Bonus turn!\n" +
                 "5. If invalid → Turn passes to next player\n\n" +
                 "🏆 WIN:\n" +
-                "First to 6 ECTS graduates!";
+                "First player/team to 6 ECTS graduates!";
 
         JTextArea textArea = new JTextArea(rules);
         textArea.setEditable(false);
@@ -192,7 +200,7 @@ public class MainWindow extends JFrame {
         textArea.setWrapStyleWord(true);
 
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(500, 400));
+        scrollPane.setPreferredSize(new Dimension(500, 500));
 
         JOptionPane.showMessageDialog(this,
                 scrollPane,

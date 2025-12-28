@@ -5,14 +5,16 @@ import model.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main game panel containing all gameplay components.
  * Coordinates between hand, lecture hall, scoreboard, and messages.
  *
  * @author Acil HAMIEH
- * @version 1.0
+ * @version 1.0 - FIXED VERSION
  */
 public class GamePanel extends JPanel {
     private MainWindow mainWindow;
@@ -31,6 +33,7 @@ public class GamePanel extends JPanel {
 
     // Selected cards
     private List<Card> selectedCards;
+    private Map<Card, Boolean> cardSources; // true = from hand, false = from hall
 
     /**
      * Constructor for GamePanel
@@ -41,6 +44,7 @@ public class GamePanel extends JPanel {
         this.mainWindow = mainWindow;
         this.gameController = gameController;
         this.selectedCards = new ArrayList<>();
+        this.cardSources = new HashMap<>();
 
         setLayout(new BorderLayout(10, 10));
         setBackground(new Color(245, 245, 245));
@@ -189,13 +193,14 @@ public class GamePanel extends JPanel {
      */
     public void onCardSelected(Card card, boolean isFromHand) {
         selectedCards.add(card);
+        cardSources.put(card, isFromHand); // Track where this card came from
 
-        // Count cards from hand and hall
+        // Count cards from hand and hall using tracked sources
         int handCards = 0;
         int hallCards = 0;
 
         for (Card c : selectedCards) {
-            if (gameController.getCurrentPlayer().getHand().contains(c)) {
+            if (cardSources.get(c)) {
                 handCards++;
             } else {
                 hallCards++;
@@ -229,6 +234,7 @@ public class GamePanel extends JPanel {
      */
     public void onCardDeselected(Card card) {
         selectedCards.remove(card);
+        cardSources.remove(card);
         formTrioButton.setEnabled(false);
 
         if (selectedCards.isEmpty()) {
@@ -238,14 +244,17 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Form trio with selected cards
+     * Form trio with selected cards - FIXED VERSION
      */
     private void formTrio() {
+        System.out.println("=== FORM TRIO DEBUG ===");
+        System.out.println("Selected cards: " + selectedCards.size());
+
         if (selectedCards.size() != 3) {
             return;
         }
 
-        // Find indices
+        // Find indices using cardSources map (FIXED!)
         Hand hand = gameController.getCurrentPlayer().getHand();
         LectureHall hall = gameController.getGame().getLectureHall();
 
@@ -253,7 +262,9 @@ public class GamePanel extends JPanel {
         int handCount = 0;
 
         for (Card card : selectedCards) {
-            if (hand.contains(card)) {
+            Boolean isFromHand = cardSources.get(card);
+            if (isFromHand != null && isFromHand) {
+                // Card is from hand
                 if (handCount == 0) {
                     handIndex1 = hand.getAllCards().indexOf(card);
                 } else {
@@ -261,13 +272,18 @@ public class GamePanel extends JPanel {
                 }
                 handCount++;
             } else {
+                // Card is from hall
                 hallIndex = hall.getAllCards().indexOf(card);
             }
         }
 
+        System.out.println("Indices: [" + handIndex1 + ", " + handIndex2 + ", " + hallIndex + "]");
+
         // Execute turn
         int[] indices = {handIndex1, handIndex2, hallIndex};
         boolean success = gameController.executeTurn(indices);
+
+        System.out.println("ExecuteTurn result: " + success);
 
         if (success) {
             messagePanel.setMessage("Valid trio! +ECTS! You get a bonus turn!",
@@ -290,26 +306,55 @@ public class GamePanel extends JPanel {
      */
     private void clearSelection() {
         selectedCards.clear();
+        cardSources.clear();
         formTrioButton.setEnabled(false);
         handPanel.clearSelection();
         lectureHallPanel.clearSelection();
     }
 
     /**
-     * Update all displays
+     * Update all displays - FIXED VERSION (no doubling!)
      */
     public void updateDisplay() {
-        // Update player info
-        removeAll();
-        createComponents();
+        System.out.println("=== UPDATE DISPLAY ===");
 
-        // Update panels
+        // Update panels WITHOUT recreating them (FIXED!)
         handPanel.updateDisplay(gameController.getCurrentPlayer().getHand());
         lectureHallPanel.updateDisplay(gameController.getGame().getLectureHall());
         scoreBoardPanel.updateDisplay();
 
+        // Update only the top panel (player info)
+        updateTopPanel();
+
         revalidate();
         repaint();
+    }
+
+    /**
+     * Update only the top panel with current player info - FIXED VERSION
+     */
+    private void updateTopPanel() {
+        // Find and remove the old top panel
+        Component[] components = getComponents();
+        for (Component comp : components) {
+            if (comp instanceof JPanel) {
+                Container parent = comp.getParent();
+                if (parent == this) {
+                    LayoutManager layout = getLayout();
+                    if (layout instanceof BorderLayout) {
+                        Object constraints = ((BorderLayout) layout).getConstraints(comp);
+                        if (BorderLayout.NORTH.equals(constraints)) {
+                            remove(comp);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add new top panel
+        JPanel topPanel = createTopPanel();
+        add(topPanel, BorderLayout.NORTH);
     }
 
     /**
@@ -351,7 +396,7 @@ public class GamePanel extends JPanel {
                 "Game Over",
                 JOptionPane.INFORMATION_MESSAGE);
 
-        mainWindow.endGame();
+        mainWindow.showMenu();
     }
 
     /**

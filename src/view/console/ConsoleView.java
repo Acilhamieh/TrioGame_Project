@@ -92,7 +92,7 @@ public class ConsoleView {
         // Team mode validation
         if (mode.isTeamMode() && numPlayers % 2 != 0) {
             System.out.println("\n❌ Team mode requires an even number of players!");
-            System.out.println("Please select " + (numPlayers == 3 ? "4" : "2") + " players for team mode.\n");
+            System.out.println("Please select 2, 4, or 6 players for team mode.\n");
             inputReader.waitForEnter();
             return;
         }

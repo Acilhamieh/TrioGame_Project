@@ -28,7 +28,7 @@ public class GameController {
 
     /**
      * Initialize a new game with player configuration
-     * @param numPlayers Number of players (3-4)
+     * @param numPlayers Number of players (2-6)
      * @param mode Game mode
      * @param difficulty Difficulty level
      * @param playerNames List of player names
@@ -37,8 +37,8 @@ public class GameController {
     public boolean initializeGame(int numPlayers, GameMode mode, Difficulty difficulty, List<String> playerNames) {
         try {
             // Validate inputs
-            if (numPlayers < 3 || numPlayers > 4) {
-                System.out.println("Error: Must have 3 or 4 players");
+            if (numPlayers < 2 || numPlayers > 6) {
+                System.out.println("Error: Must have 2-6 players");
                 return false;
             }
 

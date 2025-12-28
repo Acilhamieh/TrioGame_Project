@@ -102,26 +102,24 @@ public class MenuPanel extends JPanel {
         panel.add(setupLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // Player count
+        // Player count (2-6 players)
         panel.add(createLabeledCombo("Number of Players:",
-                new String[]{"3 Players", "4 Players"},
+                new String[]{"2 Players", "3 Players", "4 Players", "5 Players", "6 Players"},
                 combo -> playerCountCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Game mode
+        // Game mode (Individual or Teams)
         panel.add(createLabeledCombo("Game Mode:",
                 new String[]{
-                        "Individual - Simple Mode (3 matching = 2 ECTS)",
-                        "Individual - Advanced Mode (3 matching same branch = 3 ECTS)",
-                        "Team - Simple Mode (Teams of 2, 3 matching = 2 ECTS)",
-                        "Team - Advanced Mode (Teams of 2, 3 matching same branch = 3 ECTS)"
+                        "Individual",
+                        "Teams (Teams of 2)"
                 },
                 combo -> gameModeCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Difficulty
+        // Difficulty (Simple or Advanced)
         panel.add(createLabeledCombo("Difficulty:",
-                new String[]{"Easy", "Normal", "Hard"},
+                new String[]{"Simple (3 matching = 2 ECTS)", "Advanced (3 matching same branch = 3 ECTS)"},
                 combo -> difficultyCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 30)));
 
@@ -132,9 +130,9 @@ public class MenuPanel extends JPanel {
         panel.add(namesLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Player name fields (create 4, show/hide based on player count)
-        playerNameFields = new JTextField[4];
-        for (int i = 0; i < 4; i++) {
+        // Player name fields (create 6, show/hide based on player count)
+        playerNameFields = new JTextField[6];
+        for (int i = 0; i < 6; i++) {
             JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             namePanel.setBackground(new Color(240, 248, 255));
 
@@ -148,17 +146,19 @@ public class MenuPanel extends JPanel {
             namePanel.add(playerNameFields[i]);
             panel.add(namePanel);
 
-            // Hide 4th player initially
-            if (i == 3) {
+            // Hide players 3-6 initially (start with 2)
+            if (i >= 2) {
                 namePanel.setVisible(false);
             }
         }
 
-        // Add listener to show/hide 4th player field
+        // Add listener to show/hide player fields based on count
         playerCountCombo.addActionListener(e -> {
-            int count = playerCountCombo.getSelectedIndex() + 3; // 3 or 4
-            Component parent = playerNameFields[3].getParent();
-            parent.setVisible(count == 4);
+            int count = playerCountCombo.getSelectedIndex() + 2; // 2-6
+            for (int i = 0; i < 6; i++) {
+                Component parent = playerNameFields[i].getParent();
+                parent.setVisible(i < count);
+            }
         });
 
         return panel;
@@ -241,7 +241,7 @@ public class MenuPanel extends JPanel {
      */
     private void startGame() {
         // Get configuration
-        int numPlayers = playerCountCombo.getSelectedIndex() + 3; // 3 or 4
+        int numPlayers = playerCountCombo.getSelectedIndex() + 2; // 2-6
 
         GameMode mode = getSelectedGameMode();
         Difficulty difficulty = getSelectedDifficulty();
@@ -270,13 +270,23 @@ public class MenuPanel extends JPanel {
             playerNames.add(name);
         }
 
-        // Validate team mode
+        // Validate team mode - must have even number of players
         if (mode.isTeamMode() && numPlayers % 2 != 0) {
             JOptionPane.showMessageDialog(this,
-                    "Team mode requires an even number of players!",
+                    "Team mode requires an even number of players!\n" +
+                            "Current: " + numPlayers + " players\n" +
+                            "Please select 2, 4, or 6 players.",
                     "Invalid Configuration",
                     JOptionPane.ERROR_MESSAGE);
             return;
+        }
+
+        // For team mode, let players choose partners
+        if (mode.isTeamMode()) {
+            boolean partnersConfirmed = confirmTeamPartners(playerNames);
+            if (!partnersConfirmed) {
+                return; // User cancelled
+            }
         }
 
         // Start game
@@ -284,17 +294,60 @@ public class MenuPanel extends JPanel {
     }
 
     /**
+     * Let players confirm team partnerships
+     * @param playerNames List of player names
+     * @return true if confirmed, false if cancelled
+     */
+    private boolean confirmTeamPartners(List<String> playerNames) {
+        StringBuilder teamInfo = new StringBuilder();
+        teamInfo.append("Team Formation:\n\n");
+
+        int teamNumber = 1;
+        for (int i = 0; i < playerNames.size(); i += 2) {
+            teamInfo.append("Team ").append(teamNumber).append(": ");
+            teamInfo.append(playerNames.get(i));
+            teamInfo.append(" & ");
+            teamInfo.append(playerNames.get(i + 1));
+            teamInfo.append("\n");
+            teamNumber++;
+        }
+
+        teamInfo.append("\nPlayers are paired in order entered.\n");
+        teamInfo.append("Continue with these teams?");
+
+        int choice = JOptionPane.showConfirmDialog(this,
+                teamInfo.toString(),
+                "Confirm Teams",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        return choice == JOptionPane.YES_OPTION;
+    }
+
+    /**
      * Get selected game mode
      * @return Selected GameMode enum
      */
     private GameMode getSelectedGameMode() {
-        int index = gameModeCombo.getSelectedIndex();
-        switch (index) {
-            case 0: return GameMode.INDIVIDUAL_SIMPLE;
-            case 1: return GameMode.INDIVIDUAL_ADVANCED;
-            case 2: return GameMode.TEAM_SIMPLE;
-            case 3: return GameMode.TEAM_ADVANCED;
-            default: return GameMode.INDIVIDUAL_SIMPLE;
+        int modeIndex = gameModeCombo.getSelectedIndex();
+        int difficultyIndex = difficultyCombo.getSelectedIndex();
+
+        // Combine mode and difficulty
+        // Mode: 0 = Individual, 1 = Teams
+        // Difficulty: 0 = Simple, 1 = Advanced
+
+        if (modeIndex == 0) { // Individual
+            if (difficultyIndex == 0) {
+                return GameMode.INDIVIDUAL_SIMPLE;
+            } else {
+                return GameMode.INDIVIDUAL_ADVANCED;
+            }
+        } else { // Teams
+            if (difficultyIndex == 0) {
+                return GameMode.TEAM_SIMPLE;
+            } else {
+                return GameMode.TEAM_ADVANCED;
+            }
         }
     }
 
@@ -303,12 +356,8 @@ public class MenuPanel extends JPanel {
      * @return Selected Difficulty enum
      */
     private Difficulty getSelectedDifficulty() {
-        int index = difficultyCombo.getSelectedIndex();
-        switch (index) {
-            case 0: return Difficulty.EASY;
-            case 1: return Difficulty.NORMAL;
-            case 2: return Difficulty.HARD;
-            default: return Difficulty.NORMAL;
-        }
+        // For compatibility with existing system, return NORMAL
+        // The actual difficulty (Simple/Advanced) is handled by GameMode
+        return Difficulty.NORMAL;
     }
 }

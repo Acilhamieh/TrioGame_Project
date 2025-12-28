@@ -156,6 +156,9 @@ public class Game {
                 lectureHall.removeCard(card);
             }
 
+            // *** FIXED: Refill player's hand to 5 cards ***
+            refillPlayerHand(student);
+
             // Replace cards in lecture hall
             refillLectureHall();
 
@@ -188,7 +191,18 @@ public class Game {
             }
         }
     }
-
+    /**
+     * Refill player's hand back to 5 cards after forming a trio
+     * @param student The student whose hand to refill
+     */
+    private void refillPlayerHand(Student student) {
+        while (student.getHand().getSize() < 5 && !deck.isEmpty()) {
+            Card card = deck.dealCard();
+            if (card != null) {
+                student.getHand().addCard(card);
+            }
+        }
+    }
     /**
      * Check if any student or team has won
      * @return The winning student, or null if no winner yet

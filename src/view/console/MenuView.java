@@ -48,11 +48,11 @@ public class MenuView {
 
     /**
      * Get number of players from user
-     * @return Number of players (3 or 4), or -1 if cancelled
+     * @return Number of players (2-6), or -1 if cancelled
      */
     public int getPlayerCount() {
         System.out.println("\n👥 How many players?");
-        System.out.println("  3 or 4 players");
+        System.out.println("  2-6 players");
         System.out.print("\nNumber of players: ");
 
         String input = inputReader.readLine().trim();
@@ -63,10 +63,10 @@ public class MenuView {
 
         try {
             int count = Integer.parseInt(input);
-            if (count == 3 || count == 4) {
+            if (count >= 2 && count <= 6) {
                 return count;
             } else {
-                System.out.println("❌ Must be 3 or 4 players!");
+                System.out.println("❌ Must be 2-6 players!");
                 return getPlayerCount(); // Retry
             }
         } catch (NumberFormatException e) {

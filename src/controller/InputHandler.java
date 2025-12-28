@@ -33,15 +33,15 @@ public class InputHandler {
     /**
      * Parse player count from input
      * @param input User input string
-     * @return Number of players (3 or 4), or -1 if invalid
+     * @return Number of players (2-6), or -1 if invalid
      */
     public int parsePlayerCount(String input) {
         try {
             int count = Integer.parseInt(input.trim());
-            if (count == 3 || count == 4) {
+            if (count >= 2 && count <= 6) {
                 return count;
             }
-            System.out.println("❌ Invalid player count. Must be 3 or 4.");
+            System.out.println("❌ Invalid player count. Must be 2-6 players.");
             return -1;
         } catch (NumberFormatException e) {
             System.out.println("❌ Invalid input. Please enter a number.");
