@@ -12,9 +12,10 @@ import java.util.Map;
  * Panel displaying ALL other players' hands.
  * Shows first & last cards visible, middle hidden.
  * Player can select from ANY other player.
+ * COMPACT: Reduced spacing
  *
  * @author Dana SLEIMAN, Acil HAMIEH
- * @version 1.0 - Show all other players
+ * @version 1.1 - Compact spacing
  */
 public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
@@ -37,7 +38,7 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
                 "Other Players' Hands (First & Last Visible)",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 16)
+                new Font("SansSerif", Font.BOLD, 14)  // REDUCED from 16
         ));
     }
 
@@ -57,7 +58,7 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
             if (!player.equals(currentPlayer)) {
                 JPanel playerPanel = createPlayerHandPanel(player);
                 add(playerPanel);
-                add(Box.createRigidArea(new Dimension(0, 10)));
+                add(Box.createRigidArea(new Dimension(0, 5)));  // REDUCED from 10
                 playerHandPanels.add(playerPanel);
             }
         }
@@ -67,27 +68,27 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
     }
 
     /**
-     * Create a panel for one player's hand
+     * Create a panel for one player's hand - COMPACT
      * @param player The player
      * @return Panel showing their hand
      */
     private JPanel createPlayerHandPanel(Student player) {
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(5, 5));
+        panel.setLayout(new BorderLayout(3, 3));  // REDUCED from 5
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY, 1),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)  // REDUCED from 10
         ));
 
         // Player name label
         JLabel nameLabel = new JLabel(player.getName() + " (" + player.getHand().getSize() + " cards)");
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 12));  // REDUCED from 14
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(nameLabel, BorderLayout.NORTH);
 
         // Cards panel
-        JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));  // REDUCED from 5
         cardsPanel.setBackground(Color.WHITE);
 
         Hand hand = player.getHand();

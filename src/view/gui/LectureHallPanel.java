@@ -9,9 +9,10 @@ import java.util.List;
 /**
  * Panel displaying the Lecture Hall (grid of cards).
  * ALL CARDS VISIBLE with IDs
+ * OPTIMIZED: Reduced spacing for better fit
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 2.0 - Memory game with IDs
+ * @version 2.1 - Reduced spacing
  */
 public class LectureHallPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
@@ -27,7 +28,7 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
         this.cardComponents = new ArrayList<>();
         this.gridSize = 9; // Default 3x3
 
-        setLayout(new GridLayout(3, 3, 15, 15));
+        setLayout(new GridLayout(3, 3, 8, 8));  // REDUCED from 15 to 8
         setBackground(new Color(240, 248, 255)); // Alice Blue
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
@@ -35,9 +36,9 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
                         "Lecture Hall (All Visible)",
                         javax.swing.border.TitledBorder.CENTER,
                         javax.swing.border.TitledBorder.TOP,
-                        new Font("SansSerif", Font.BOLD, 18)
+                        new Font("SansSerif", Font.BOLD, 16)  // Reduced from 18
                 ),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)  // REDUCED from 20 to 10
         ));
     }
 
@@ -56,11 +57,11 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
 
         // Update grid layout based on size
         if (gridSize == 9) {
-            setLayout(new GridLayout(3, 3, 15, 15));
+            setLayout(new GridLayout(3, 3, 8, 8));  // REDUCED spacing
         } else if (gridSize == 8) {
-            setLayout(new GridLayout(3, 3, 15, 15)); // Still 3x3, one empty
+            setLayout(new GridLayout(3, 3, 8, 8));  // Still 3x3, one empty
         } else if (gridSize == 6) {
-            setLayout(new GridLayout(2, 3, 15, 15)); // 2x3
+            setLayout(new GridLayout(2, 3, 8, 8));  // 2x3
         }
 
         // Add cards - ALL VISIBLE (no hidden cards in lecture hall)
@@ -88,11 +89,12 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
      */
     private JPanel createEmptySlot() {
         JPanel panel = new JPanel();
-        panel.setBackground(new Color(200, 200, 200));
-        panel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 2, 5, 5, true));
+        panel.setBackground(new Color(220, 220, 220));
+        panel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 1, 3, 3, true));
 
         JLabel label = new JLabel("Empty", SwingConstants.CENTER);
         label.setForeground(Color.GRAY);
+        label.setFont(new Font("SansSerif", Font.PLAIN, 10));
         panel.add(label);
 
         return panel;

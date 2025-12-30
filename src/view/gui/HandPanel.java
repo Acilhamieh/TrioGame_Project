@@ -8,10 +8,11 @@ import java.util.List;
 
 /**
  * Panel displaying the current player's hand.
- * MEMORY GAME: Shows first & last cards visible, middle hidden
+ * MEMORY GAME: Shows ALL cards to current player
+ * COMPACT: Reduced spacing
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 2.0 - Memory game support
+ * @version 2.1 - Compact spacing
  */
 public class HandPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
@@ -26,16 +27,16 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
         this.gamePanel = gamePanel;
         this.cardComponents = new ArrayList<>();
 
-        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));  // REDUCED from 10 to 5
         setBackground(new Color(220, 220, 220));
         setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
                 "Your Hand (All Visible to You)",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 16)
+                new Font("SansSerif", Font.BOLD, 14)  // REDUCED from 16
         ));
-        setPreferredSize(new Dimension(0, 160));
+        setPreferredSize(new Dimension(0, 140));  // REDUCED from 160
     }
 
     /**
