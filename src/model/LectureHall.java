@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents the Lecture Hall - the central area with 9 visible cards.
+ * Represents the Lecture Hall - the central area with visible cards.
  * Players select cards from here to form trios.
  *
  * @author Dana SLEIMAN
- * @version 1.0
+ * @version 1.1 - Added contains() method
  */
 public class LectureHall {
     private List<Card> visibleCards;
@@ -66,6 +66,15 @@ public class LectureHall {
             return visibleCards.get(index);
         }
         return null;
+    }
+
+    /**
+     * Check if lecture hall contains a specific card
+     * @param card The card to check for
+     * @return true if card is in lecture hall
+     */
+    public boolean contains(Card card) {
+        return visibleCards.contains(card);
     }
 
     /**

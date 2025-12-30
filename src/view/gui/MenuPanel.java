@@ -8,10 +8,10 @@ import java.util.List;
 
 /**
  * Menu panel for game setup and main menu.
- * Handles game configuration before starting.
+ * MEMORY GAME: 3-6 players (need neighbors for memory mechanic)
  *
- * @author Acil HAMIEH
- * @version 1.0
+ * @author Acil HAMIEH, Dana SLEIMAN
+ * @version 2.0 - Memory game (3-6 players)
  */
 public class MenuPanel extends JPanel {
     private MainWindow mainWindow;
@@ -73,8 +73,8 @@ public class MenuPanel extends JPanel {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Subtitle
-        JLabel subtitleLabel = new JLabel("Graduate by Forming Course Trios!");
-        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        JLabel subtitleLabel = new JLabel("Memory Game Edition - Graduate by Remembering!");
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
         subtitleLabel.setForeground(Color.WHITE);
         subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -102,9 +102,9 @@ public class MenuPanel extends JPanel {
         panel.add(setupLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // Player count (2-6 players)
+        // Player count (3-6 players for memory game!)
         panel.add(createLabeledCombo("Number of Players:",
-                new String[]{"2 Players", "3 Players", "4 Players", "5 Players", "6 Players"},
+                new String[]{"3 Players", "4 Players", "5 Players", "6 Players"},
                 combo -> playerCountCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
@@ -146,15 +146,15 @@ public class MenuPanel extends JPanel {
             namePanel.add(playerNameFields[i]);
             panel.add(namePanel);
 
-            // Hide players 3-6 initially (start with 2)
-            if (i >= 2) {
+            // Hide players 4-6 initially (start with 3)
+            if (i >= 3) {
                 namePanel.setVisible(false);
             }
         }
 
         // Add listener to show/hide player fields based on count
         playerCountCombo.addActionListener(e -> {
-            int count = playerCountCombo.getSelectedIndex() + 2; // 2-6
+            int count = playerCountCombo.getSelectedIndex() + 3; // 3-6 (index 0=3, 1=4, 2=5, 3=6)
             for (int i = 0; i < 6; i++) {
                 Component parent = playerNameFields[i].getParent();
                 parent.setVisible(i < count);
@@ -240,8 +240,8 @@ public class MenuPanel extends JPanel {
      * Validate and start game
      */
     private void startGame() {
-        // Get configuration
-        int numPlayers = playerCountCombo.getSelectedIndex() + 2; // 2-6
+        // Get configuration - UPDATED for 3-6 players
+        int numPlayers = playerCountCombo.getSelectedIndex() + 3; // 3-6 (index 0=3, 1=4, 2=5, 3=6)
 
         GameMode mode = getSelectedGameMode();
         Difficulty difficulty = getSelectedDifficulty();
@@ -275,7 +275,7 @@ public class MenuPanel extends JPanel {
             JOptionPane.showMessageDialog(this,
                     "Team mode requires an even number of players!\n" +
                             "Current: " + numPlayers + " players\n" +
-                            "Please select 2, 4, or 6 players.",
+                            "Please select 4 or 6 players for team mode.",
                     "Invalid Configuration",
                     JOptionPane.ERROR_MESSAGE);
             return;

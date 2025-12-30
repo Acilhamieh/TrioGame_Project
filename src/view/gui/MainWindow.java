@@ -7,11 +7,11 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Main window for the Trio_UTBM GUI.
+ * Main window for the Trio_UTBM GUI - MEMORY GAME VERSION.
  * Contains all GUI panels and manages the overall interface.
  *
- * @author Acil HAMIEH
- * @version 1.0
+ * @author Acil HAMIEH, Dana SLEIMAN
+ * @version 2.0 - Memory game
  */
 public class MainWindow extends JFrame {
     private GameController gameController;
@@ -23,9 +23,9 @@ public class MainWindow extends JFrame {
     private GamePanel gamePanel;
 
     // Constants
-    private static final int WINDOW_WIDTH = 1200;
-    private static final int WINDOW_HEIGHT = 800;
-    private static final String TITLE = "Trio_UTBM - Graduate by Forming Course Trios!";
+    private static final int WINDOW_WIDTH = 1400;
+    private static final int WINDOW_HEIGHT = 900;
+    private static final String TITLE = "Trio_UTBM - Memory Game Edition!";
 
     /**
      * Constructor for MainWindow
@@ -49,14 +49,7 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center on screen
         setResizable(true);
-        setMinimumSize(new Dimension(1000, 700));
-
-        // Set application icon (if available)
-        try {
-            // You can add an icon later: setIconImage(...)
-        } catch (Exception e) {
-            // Icon not found, continue without it
-        }
+        setMinimumSize(new Dimension(1200, 800));
     }
 
     /**
@@ -159,16 +152,27 @@ public class MainWindow extends JFrame {
     }
 
     /**
-     * Show rules dialog
+     * Show rules dialog - UPDATED FOR MEMORY GAME
      */
     public void showRules() {
-        String rules = "🎓 TRIO_UTBM - GAME RULES\n\n" +
+        String rules = "🎓 TRIO_UTBM - MEMORY GAME RULES\n\n" +
                 "🎯 OBJECTIVE:\n" +
                 "Be the first to earn 6 ECTS credits by forming trios!\n\n" +
                 "🎴 WHAT IS A TRIO?\n" +
                 "Three cards with the SAME course code\n\n" +
+                "🧠 MEMORY GAME MECHANICS:\n" +
+                "• Cards are sorted by ID (highest → lowest)\n" +
+                "• Your hand: Only FIRST & LAST cards visible\n" +
+                "• Neighbor's hand: Only FIRST & LAST cards visible\n" +
+                "• Lecture hall: ALL cards visible with IDs\n" +
+                "• Middle cards are HIDDEN [?] - you must remember them!\n\n" +
+                "🎴 CARD IDs (memorize these!):\n" +
+                "SY41=12, IA41=11, SY48=10, AP4B=9\n" +
+                "GI21=8, GI28=7, GI41=6\n" +
+                "MQ18=5, MQ41=4, MQ51=3\n" +
+                "EN21=2, PFE=1\n\n" +
                 "👥 NUMBER OF PLAYERS:\n" +
-                "• 2-6 players\n" +
+                "• 3-6 players recommended for memory game\n" +
                 "• Team mode requires even number (2, 4, or 6)\n\n" +
                 "📚 GAME MODES:\n" +
                 "• Individual: Play alone\n" +
@@ -184,27 +188,35 @@ public class MainWindow extends JFrame {
                 "• ⭐ PFE (Special)\n\n" +
                 "⭐ SPECIAL:\n" +
                 "• PFE Trio (3 PFE cards) = 6 ECTS = Instant Win!\n\n" +
-                "🔄 HOW TO PLAY:\n" +
-                "1. Select 2 cards from your hand\n" +
-                "2. Select 1 card from the Lecture Hall\n" +
-                "3. Click 'Form Trio' button\n" +
-                "4. If valid trio → Earn ECTS + Bonus turn!\n" +
-                "5. If invalid → Turn passes to next player\n\n" +
+                "🔄 HOW TO PLAY (NEW RULES!):\n" +
+                "1. Select 1 card from YOUR hand (position 0-8)\n" +
+                "2. Select 1 card from NEIGHBOR's hand (position 0-7)\n" +
+                "3. Select 1 card from LECTURE HALL (all visible)\n" +
+                "4. Click 'Form Trio' button\n" +
+                "5. If valid trio → Earn ECTS + Bonus turn!\n" +
+                "6. If invalid → Turn passes to next player\n" +
+                "7. Both YOUR and NEIGHBOR's hands refill\n" +
+                "8. Cards re-sort by ID automatically\n\n" +
+                "🧠 STRATEGY:\n" +
+                "• Remember which cards you drew\n" +
+                "• Watch what neighbors draw\n" +
+                "• Track IDs to deduce hidden cards\n" +
+                "• Use lecture hall (all visible) to plan moves\n\n" +
                 "🏆 WIN:\n" +
                 "First player/team to 6 ECTS graduates!";
 
         JTextArea textArea = new JTextArea(rules);
         textArea.setEditable(false);
-        textArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        textArea.setFont(new Font("SansSerif", Font.PLAIN, 12));
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
 
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(500, 500));
+        scrollPane.setPreferredSize(new Dimension(600, 600));
 
         JOptionPane.showMessageDialog(this,
                 scrollPane,
-                "Game Rules",
+                "Memory Game Rules",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -212,8 +224,14 @@ public class MainWindow extends JFrame {
      * Show about dialog
      */
     public void showAbout() {
-        String about = "🎓 TRIO_UTBM\n\n" +
-                "A card game about graduating from UTBM!\n\n" +
+        String about = "🎓 TRIO_UTBM - MEMORY GAME EDITION\n\n" +
+                "A memory-based card game about graduating from UTBM!\n\n" +
+                "🎮 NEW FEATURES:\n" +
+                "• Card ID system (1-12)\n" +
+                "• Hidden cards (only first & last visible)\n" +
+                "• Memory-based gameplay\n" +
+                "• Neighbor card selection\n" +
+                "• Auto-sorting by ID\n\n" +
                 "👨‍💻 Developed by:\n" +
                 "• Dana SLEIMAN\n" +
                 "• Acil HAMIEH\n\n" +
@@ -222,8 +240,9 @@ public class MainWindow extends JFrame {
                 "    de Belfort-Montbéliard\n\n" +
                 "📅 Session 1: Model & UML Design\n" +
                 "📅 Session 2: Controllers & Console Interface\n" +
-                "📅 Session 3: Graphical User Interface\n\n" +
-                "Version 1.0 - 2024";
+                "📅 Session 3: Graphical User Interface\n" +
+                "📅 Session 4: Memory Game Enhancement\n\n" +
+                "Version 2.0 - Memory Game - 2024";
 
         JOptionPane.showMessageDialog(this,
                 about,

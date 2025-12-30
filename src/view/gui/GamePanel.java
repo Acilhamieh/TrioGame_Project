@@ -1,439 +1,423 @@
 package view.gui;
 
-import controller.*;
+import controller.GameController;
 import model.*;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Main game panel containing all gameplay components.
- * Coordinates between hand, lecture hall, scoreboard, and messages.
+ * Main game panel for Trio_UTBM memory game.
+ * NEW RULES: Select 1 from hand + 1 from ANY other player + 1 from hall
  *
- * @author Acil HAMIEH
- * @version 1.0 - FIXED VERSION
+ * @author Acil HAMIEH, Dana SLEIMAN
+ * @version 3.1 - Fixed layout for visible lecture hall
  */
 public class GamePanel extends JPanel {
     private MainWindow mainWindow;
-    private GameController gameController;
+    private GameController controller;
 
-    // Sub-panels
+    // UI Components
+    private JPanel topPanel;
     private HandPanel handPanel;
+    private OtherPlayersPanel otherPlayersPanel;  // NEW! Shows ALL other players
     private LectureHallPanel lectureHallPanel;
-    private ScoreBoardPanel scoreBoardPanel;
-    private MessagePanel messagePanel;
+    private JPanel controlPanel;
 
     // Control buttons
     private JButton formTrioButton;
-    private JButton viewScoresButton;
+    private JButton clearSelectionButton;
     private JButton quitButton;
 
-    // Selected cards
-    private List<Card> selectedCards;
-    private Map<Card, Boolean> cardSources; // true = from hand, false = from hall
+    // Labels
+    private JLabel playerLabel;
+    private JLabel scoreLabel;
+    private JLabel instructionLabel;
+
+    // Selection tracking - NEW SYSTEM
+    private Card selectedFromHand = null;
+    private int selectedHandPosition = -1;
+    private Card selectedFromOtherPlayer = null;
+    private int selectedOtherPlayerPosition = -1;
+    private String selectedOtherPlayerName = null;  // Track which player
+    private Card selectedFromHall = null;
+    private int selectedHallPosition = -1;
 
     /**
-     * Constructor for GamePanel
-     * @param mainWindow Reference to main window
-     * @param gameController Game controller
+     * Constructor for GamePanel (compatible with MainWindow)
+     * @param mainWindow Main window reference
+     * @param controller Game controller
      */
-    public GamePanel(MainWindow mainWindow, GameController gameController) {
+    public GamePanel(MainWindow mainWindow, GameController controller) {
         this.mainWindow = mainWindow;
-        this.gameController = gameController;
-        this.selectedCards = new ArrayList<>();
-        this.cardSources = new HashMap<>();
+        this.controller = controller;
 
         setLayout(new BorderLayout(10, 10));
         setBackground(new Color(245, 245, 245));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        createComponents();
+        initializeComponents();
+        updateDisplay();
     }
 
     /**
-     * Create all components
+     * Initialize all UI components
+     * FIXED: Use GridLayout for equal space distribution
      */
-    private void createComponents() {
-        // Top panel: Current player info and controls
-        JPanel topPanel = createTopPanel();
+    private void initializeComponents() {
+        // Top panel (player info)
+        createTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
-        // Center panel: Lecture hall
+        // Center panel - FIXED: Use GridLayout(3 rows) for equal space
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        centerPanel.setOpaque(false);
+
+        // Other players' hands (top) - with scroll if needed
+        otherPlayersPanel = new OtherPlayersPanel(this);
+        JScrollPane otherPlayersScroll = new JScrollPane(otherPlayersPanel);
+        otherPlayersScroll.setPreferredSize(new Dimension(0, 220));
+        otherPlayersScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        otherPlayersScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        otherPlayersScroll.setBorder(null);
+        centerPanel.add(otherPlayersScroll);
+
+        // Lecture hall (middle) - NOW HAS EQUAL SPACE!
         lectureHallPanel = new LectureHallPanel(this);
-        add(lectureHallPanel, BorderLayout.CENTER);
+        centerPanel.add(lectureHallPanel);
 
-        // Bottom panel: Player's hand
+        // Your hand (bottom)
         handPanel = new HandPanel(this);
-        add(handPanel, BorderLayout.SOUTH);
+        centerPanel.add(handPanel);
 
-        // Right panel: Scoreboard and messages
-        JPanel rightPanel = createRightPanel();
-        add(rightPanel, BorderLayout.EAST);
+        add(centerPanel, BorderLayout.CENTER);
+
+        // Control panel
+        createControlPanel();
+        add(controlPanel, BorderLayout.SOUTH);
     }
 
     /**
-     * Create top panel with player info and controls
-     * @return Top panel
+     * Create top panel with player info
      */
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(70, 130, 180)); // Steel Blue
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private void createTopPanel() {
+        topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(new Color(70, 130, 180));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        // Player info panel
-        JPanel infoPanel = createPlayerInfoPanel();
-        panel.add(infoPanel, BorderLayout.CENTER);
-
-        // Control buttons
-        JPanel buttonPanel = createControlButtons();
-        panel.add(buttonPanel, BorderLayout.EAST);
-
-        return panel;
-    }
-
-    /**
-     * Create player info panel
-     * @return Player info panel
-     */
-    private JPanel createPlayerInfoPanel() {
-        JPanel panel = new JPanel(new GridLayout(3, 1, 5, 5));
-        panel.setBackground(new Color(70, 130, 180));
-
-        Student currentPlayer = gameController.getCurrentPlayer();
-        Game game = gameController.getGame();
-
-        // Current player
-        JLabel playerLabel = new JLabel("Current Player: " + currentPlayer.getName());
+        // Left: Player name
+        playerLabel = new JLabel("Player: Loading...");
         playerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         playerLabel.setForeground(Color.WHITE);
+        topPanel.add(playerLabel, BorderLayout.WEST);
 
-        // ECTS progress
-        JLabel ectsLabel = new JLabel("ECTS: " + currentPlayer.getEctsCredits() + "/6");
-        ectsLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        ectsLabel.setForeground(Color.YELLOW);
+        // Center: Instructions
+        instructionLabel = new JLabel("Select: 1 from YOUR hand + 1 from ANY other player + 1 from HALL");
+        instructionLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        instructionLabel.setForeground(Color.WHITE);
+        instructionLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        topPanel.add(instructionLabel, BorderLayout.CENTER);
 
-        // Round info
-        JLabel roundLabel = new JLabel("Round: " + game.getTurnManager().getRoundNumber() +
-                " | Mode: " + game.getGameMode().getDisplayName());
-        roundLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        roundLabel.setForeground(Color.WHITE);
-
-        panel.add(playerLabel);
-        panel.add(ectsLabel);
-        panel.add(roundLabel);
-
-        return panel;
+        // Right: Score
+        scoreLabel = new JLabel("ECTS: 0 | Trios: 0");
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        scoreLabel.setForeground(Color.WHITE);
+        topPanel.add(scoreLabel, BorderLayout.EAST);
     }
 
     /**
-     * Create control buttons
-     * @return Button panel
+     * Create control panel with buttons
      */
-    private JPanel createControlButtons() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-        panel.setBackground(new Color(70, 130, 180));
+    private void createControlPanel() {
+        controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        controlPanel.setBackground(new Color(220, 220, 220));
 
         // Form Trio button
         formTrioButton = new JButton("Form Trio");
-        formTrioButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        formTrioButton.setPreferredSize(new Dimension(120, 35));
-        formTrioButton.setBackground(new Color(34, 139, 34));
-        formTrioButton.setForeground(Color.WHITE);
+        formTrioButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+        formTrioButton.setPreferredSize(new Dimension(150, 40));
         formTrioButton.setEnabled(false);
         formTrioButton.addActionListener(e -> formTrio());
+        controlPanel.add(formTrioButton);
 
-        // View Scores button
-        viewScoresButton = new JButton("Scores");
-        viewScoresButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        viewScoresButton.setPreferredSize(new Dimension(100, 35));
-        viewScoresButton.addActionListener(e -> showDetailedScores());
+        // Clear Selection button
+        clearSelectionButton = new JButton("Clear Selection");
+        clearSelectionButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        clearSelectionButton.setPreferredSize(new Dimension(150, 40));
+        clearSelectionButton.addActionListener(e -> clearAllSelections());
+        controlPanel.add(clearSelectionButton);
 
         // Quit button
-        quitButton = new JButton("Quit");
-        quitButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        quitButton.setPreferredSize(new Dimension(100, 35));
-        quitButton.setBackground(new Color(220, 20, 60));
+        quitButton = new JButton("Quit Game");
+        quitButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        quitButton.setPreferredSize(new Dimension(120, 40));
+        quitButton.setBackground(new Color(220, 20, 60)); // Crimson
         quitButton.setForeground(Color.WHITE);
-        quitButton.addActionListener(e -> mainWindow.endGame());
-
-        panel.add(formTrioButton);
-        panel.add(viewScoresButton);
-        panel.add(quitButton);
-
-        return panel;
-    }
-
-    /**
-     * Create right panel with scoreboard and messages
-     * @return Right panel
-     */
-    private JPanel createRightPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setPreferredSize(new Dimension(280, 0));
-        panel.setBackground(new Color(245, 245, 245));
-
-        // Scoreboard
-        scoreBoardPanel = new ScoreBoardPanel(gameController);
-        panel.add(scoreBoardPanel, BorderLayout.CENTER);
-
-        // Message panel
-        messagePanel = new MessagePanel();
-        panel.add(messagePanel, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    /**
-     * Handle card selection
-     * @param card Selected card
-     * @param isFromHand True if from hand, false if from lecture hall
-     */
-    public void onCardSelected(Card card, boolean isFromHand) {
-        selectedCards.add(card);
-        cardSources.put(card, isFromHand); // Track where this card came from
-
-        // Count cards from hand and hall using tracked sources
-        int handCards = 0;
-        int hallCards = 0;
-
-        for (Card c : selectedCards) {
-            if (cardSources.get(c)) {
-                handCards++;
-            } else {
-                hallCards++;
+        quitButton.addActionListener(e -> {
+            if (mainWindow != null) {
+                mainWindow.endGame();
             }
-        }
-
-        // Update message
-        messagePanel.setMessage("Selected: " + handCards + " from hand, " +
-                hallCards + " from hall");
-
-        // Enable form trio button if we have 3 cards (2 from hand, 1 from hall)
-        if (selectedCards.size() == 3) {
-            if (handCards == 2 && hallCards == 1) {
-                formTrioButton.setEnabled(true);
-                messagePanel.setMessage("Ready! Click 'Form Trio'", MessagePanel.MessageType.INFO);
-            } else {
-                clearSelection();
-                messagePanel.setMessage("Must select 2 from hand + 1 from hall!",
-                        MessagePanel.MessageType.ERROR);
-            }
-        } else if (selectedCards.size() > 3) {
-            clearSelection();
-            messagePanel.setMessage("Too many cards! Select 3 only.",
-                    MessagePanel.MessageType.ERROR);
-        }
+        });
+        controlPanel.add(quitButton);
     }
 
     /**
-     * Handle card deselection
-     * @param card Deselected card
+     * Update entire display
+     * FIXED: Show ALL cards in own hand, show all other players
      */
-    public void onCardDeselected(Card card) {
-        selectedCards.remove(card);
-        cardSources.remove(card);
-        formTrioButton.setEnabled(false);
+    public void updateDisplay() {
+        Student currentPlayer = controller.getCurrentPlayer();
+        if (currentPlayer == null) return;
 
-        if (selectedCards.isEmpty()) {
-            messagePanel.setMessage("Select 3 cards to form a trio",
-                    MessagePanel.MessageType.INFO);
-        }
+        // Update player info
+        playerLabel.setText("Player: " + currentPlayer.getName());
+        scoreLabel.setText("ECTS: " + currentPlayer.getEctsCredits() +
+                " | Trios: " + currentPlayer.getTrioCount());
+
+        // Update own hand - SHOW ALL CARDS
+        handPanel.updateDisplayAllVisible(currentPlayer.getHand());
+
+        // Update other players' hands - NEW! Show ALL other players
+        List<Student> allPlayers = controller.getGame().getStudents();
+        otherPlayersPanel.updateDisplay(allPlayers, currentPlayer);
+
+        // Update lecture hall
+        lectureHallPanel.updateDisplay(controller.getGame().getLectureHall());
+
+        // Clear selections
+        clearAllSelections();
     }
 
     /**
-     * Form trio with selected cards - FIXED VERSION
+     * Handle card selected from YOUR hand
+     */
+    public void onHandCardSelected(Card card, int position) {
+        // Only allow 1 card from hand
+        if (selectedFromHand != null && !selectedFromHand.equals(card)) {
+            clearHandSelection();
+        }
+
+        selectedFromHand = card;
+        selectedHandPosition = position;
+        updateSelectionStatus();
+    }
+
+    /**
+     * Handle card selected from ANY other player's hand
+     * NEW METHOD for showing all players
+     */
+    public void onOtherPlayerCardSelected(Card card, int position, String playerName) {
+        // Only allow 1 card from other players
+        if (selectedFromOtherPlayer != null && !selectedFromOtherPlayer.equals(card)) {
+            clearOtherPlayersSelection();
+        }
+
+        selectedFromOtherPlayer = card;
+        selectedOtherPlayerPosition = position;
+        selectedOtherPlayerName = playerName;
+        updateSelectionStatus();
+    }
+
+    /**
+     * Handle card selected from LECTURE HALL
+     */
+    public void onHallCardSelected(Card card, int position) {
+        // Only allow 1 card from hall
+        if (selectedFromHall != null && !selectedFromHall.equals(card)) {
+            clearHallSelection();
+        }
+
+        selectedFromHall = card;
+        selectedHallPosition = position;
+        updateSelectionStatus();
+    }
+
+    /**
+     * Handle card deselected
+     */
+    public void onCardDeselected(Card card, int position) {
+        if (card.equals(selectedFromHand)) {
+            selectedFromHand = null;
+            selectedHandPosition = -1;
+        } else if (card.equals(selectedFromOtherPlayer)) {
+            selectedFromOtherPlayer = null;
+            selectedOtherPlayerPosition = -1;
+            selectedOtherPlayerName = null;
+        } else if (card.equals(selectedFromHall)) {
+            selectedFromHall = null;
+            selectedHallPosition = -1;
+        }
+        updateSelectionStatus();
+    }
+
+    /**
+     * Update selection status and button state
+     */
+    private void updateSelectionStatus() {
+        int selectedCount = 0;
+        if (selectedFromHand != null) selectedCount++;
+        if (selectedFromOtherPlayer != null) selectedCount++;
+        if (selectedFromHall != null) selectedCount++;
+
+        // Update instruction label
+        StringBuilder instruction = new StringBuilder("Selected: ");
+        if (selectedFromHand != null) {
+            instruction.append("✅ Hand(").append(selectedFromHand.getCourseCode()).append(") ");
+        } else {
+            instruction.append("❌ Hand ");
+        }
+        if (selectedFromOtherPlayer != null) {
+            instruction.append("✅ ").append(selectedOtherPlayerName).append("(").append(selectedFromOtherPlayer.getCourseCode()).append(") ");
+        } else {
+            instruction.append("❌ Other Player ");
+        }
+        if (selectedFromHall != null) {
+            instruction.append("✅ Hall(").append(selectedFromHall.getCourseCode()).append(")");
+        } else {
+            instruction.append("❌ Hall");
+        }
+
+        instructionLabel.setText(instruction.toString());
+
+        // Enable form trio button only when all 3 selected
+        formTrioButton.setEnabled(selectedCount == 3);
+    }
+
+    /**
+     * Form trio with selected cards
+     * NEW: Uses 1 from hand + 1 from ANY other player + 1 from hall
      */
     private void formTrio() {
-        System.out.println("=== FORM TRIO DEBUG ===");
-        System.out.println("Selected cards: " + selectedCards.size());
-
-        if (selectedCards.size() != 3) {
+        if (selectedFromHand == null || selectedFromOtherPlayer == null || selectedFromHall == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select:\n" +
+                            "- 1 card from YOUR hand\n" +
+                            "- 1 card from ANY other player\n" +
+                            "- 1 card from HALL",
+                    "Incomplete Selection", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Find indices using cardSources map (FIXED!)
-        Hand hand = gameController.getCurrentPlayer().getHand();
-        LectureHall hall = gameController.getGame().getLectureHall();
-
-        int handIndex1 = -1, handIndex2 = -1, hallIndex = -1;
-        int handCount = 0;
-
-        for (Card card : selectedCards) {
-            Boolean isFromHand = cardSources.get(card);
-            if (isFromHand != null && isFromHand) {
-                // Card is from hand
-                if (handCount == 0) {
-                    handIndex1 = hand.getAllCards().indexOf(card);
-                } else {
-                    handIndex2 = hand.getAllCards().indexOf(card);
-                }
-                handCount++;
-            } else {
-                // Card is from hall
-                hallIndex = hall.getAllCards().indexOf(card);
+        // Find the selected other player
+        Student currentPlayer = controller.getCurrentPlayer();
+        Student selectedPlayer = null;
+        for (Student player : controller.getGame().getStudents()) {
+            if (player.getName().equals(selectedOtherPlayerName)) {
+                selectedPlayer = player;
+                break;
             }
         }
 
-        System.out.println("Indices: [" + handIndex1 + ", " + handIndex2 + ", " + hallIndex + "]");
-
-        // Execute turn
-        int[] indices = {handIndex1, handIndex2, hallIndex};
-        boolean success = gameController.executeTurn(indices);
-
-        System.out.println("ExecuteTurn result: " + success);
-
-        if (success) {
-            messagePanel.setMessage("Valid trio! +ECTS! You get a bonus turn!",
-                    MessagePanel.MessageType.SUCCESS);
-        } else {
-            messagePanel.setMessage("Invalid trio. Turn passes to next player.",
-                    MessagePanel.MessageType.ERROR);
+        if (selectedPlayer == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Could not find player " + selectedOtherPlayerName,
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
-        // Clear selection and update display
-        clearSelection();
+        // Create list: [from hand, from other player, from hall]
+        List<Card> selectedCards = Arrays.asList(
+                selectedFromHand,
+                selectedFromOtherPlayer,
+                selectedFromHall
+        );
+
+        // Execute turn with validation
+        boolean success = controller.getGame().playTurnWithPlayer(
+                currentPlayer,
+                selectedPlayer,
+                selectedCards
+        );
+
+        if (success) {
+            // Valid trio!
+            JOptionPane.showMessageDialog(this,
+                    "Valid Trio! " + selectedFromHand.getCourseCode() + " × 3\n" +
+                            "+2 ECTS! You get a BONUS TURN!",
+                    "Success!", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // Invalid trio
+            JOptionPane.showMessageDialog(this,
+                    "Invalid Trio!\n" +
+                            "Cards: " + selectedFromHand.getCourseCode() + ", " +
+                            selectedFromOtherPlayer.getCourseCode() + ", " +
+                            selectedFromHall.getCourseCode() + "\n" +
+                            "Turn passes to next player.",
+                    "Invalid", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Update display
         updateDisplay();
 
-        // Check for victory
+        // Check victory
         checkVictory();
     }
 
     /**
-     * Clear card selection
+     * Clear all selections
      */
-    private void clearSelection() {
-        selectedCards.clear();
-        cardSources.clear();
-        formTrioButton.setEnabled(false);
+    private void clearAllSelections() {
+        selectedFromHand = null;
+        selectedHandPosition = -1;
+        selectedFromOtherPlayer = null;
+        selectedOtherPlayerPosition = -1;
+        selectedOtherPlayerName = null;
+        selectedFromHall = null;
+        selectedHallPosition = -1;
+
         handPanel.clearSelection();
+        otherPlayersPanel.clearSelection();
         lectureHallPanel.clearSelection();
+
+        updateSelectionStatus();
     }
 
     /**
-     * Update all displays - FIXED VERSION (no doubling!)
+     * Clear hand selection only
      */
-    public void updateDisplay() {
-        System.out.println("=== UPDATE DISPLAY ===");
-
-        // Update panels WITHOUT recreating them (FIXED!)
-        handPanel.updateDisplay(gameController.getCurrentPlayer().getHand());
-        lectureHallPanel.updateDisplay(gameController.getGame().getLectureHall());
-        scoreBoardPanel.updateDisplay();
-
-        // Update only the top panel (player info)
-        updateTopPanel();
-
-        revalidate();
-        repaint();
+    private void clearHandSelection() {
+        handPanel.clearSelection();
+        selectedFromHand = null;
+        selectedHandPosition = -1;
     }
 
     /**
-     * Update only the top panel with current player info - FIXED VERSION
+     * Clear other players selection only
      */
-    private void updateTopPanel() {
-        // Find and remove the old top panel
-        Component[] components = getComponents();
-        for (Component comp : components) {
-            if (comp instanceof JPanel) {
-                Container parent = comp.getParent();
-                if (parent == this) {
-                    LayoutManager layout = getLayout();
-                    if (layout instanceof BorderLayout) {
-                        Object constraints = ((BorderLayout) layout).getConstraints(comp);
-                        if (BorderLayout.NORTH.equals(constraints)) {
-                            remove(comp);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+    private void clearOtherPlayersSelection() {
+        otherPlayersPanel.clearSelection();
+        selectedFromOtherPlayer = null;
+        selectedOtherPlayerPosition = -1;
+        selectedOtherPlayerName = null;
+    }
 
-        // Add new top panel
-        JPanel topPanel = createTopPanel();
-        add(topPanel, BorderLayout.NORTH);
+    /**
+     * Clear hall selection only
+     */
+    private void clearHallSelection() {
+        lectureHallPanel.clearSelection();
+        selectedFromHall = null;
+        selectedHallPosition = -1;
     }
 
     /**
      * Check for victory condition
      */
     private void checkVictory() {
-        Student winner = gameController.getGame().checkVictoryConditions();
-
+        Student winner = controller.getGame().checkVictoryConditions();
         if (winner != null) {
-            showVictoryDialog(winner);
+            JOptionPane.showMessageDialog(this,
+                    "🎉 CONGRATULATIONS! 🎉\n\n" +
+                            winner.getName() + " has graduated!\n" +
+                            "Total ECTS: " + winner.getEctsCredits() + "\n" +
+                            "Trios completed: " + winner.getTrioCount(),
+                    "Game Over - Victory!",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            // Disable buttons
+            formTrioButton.setEnabled(false);
+            clearSelectionButton.setEnabled(false);
         }
-    }
-
-    /**
-     * Show victory dialog
-     * @param winner Winning student
-     */
-    private void showVictoryDialog(Student winner) {
-        String message = "🎓 GRADUATION COMPLETE! 🎓\n\n";
-
-        if (gameController.getGame().getGameMode().isTeamMode() && winner.getTeam() != null) {
-            Team team = winner.getTeam();
-            message += "Winner: " + team.getTeamName() + "\n";
-            message += "Team ECTS: " + team.getTeamScore() + "\n\n";
-            message += "Members:\n";
-            for (Student member : team.getMembers()) {
-                message += "• " + member.getName() + ": " + member.getEctsCredits() + " ECTS\n";
-            }
-        } else {
-            message += "Winner: " + winner.getName() + "\n";
-            message += "ECTS: " + winner.getEctsCredits() + "\n";
-            message += "Trios: " + winner.getTrioCount();
-        }
-
-        message += "\n\nCongratulations!";
-
-        JOptionPane.showMessageDialog(this,
-                message,
-                "Game Over",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        mainWindow.showMenu();
-    }
-
-    /**
-     * Show detailed scores dialog
-     */
-    private void showDetailedScores() {
-        StringBuilder scores = new StringBuilder("📊 DETAILED SCORES\n\n");
-
-        if (gameController.getGame().getGameMode().isTeamMode()) {
-            for (Team team : gameController.getGame().getTeams()) {
-                scores.append(team.getTeamName()).append(": ")
-                        .append(team.getTeamScore()).append(" ECTS\n");
-                for (Student member : team.getMembers()) {
-                    scores.append("  • ").append(member.getName()).append(": ")
-                            .append(member.getEctsCredits()).append(" ECTS\n");
-                }
-                scores.append("\n");
-            }
-        } else {
-            for (Student student : gameController.getGame().getStudents()) {
-                scores.append(student.getName()).append(": ")
-                        .append(student.getEctsCredits()).append("/6 ECTS (")
-                        .append(student.getTrioCount()).append(" trios)\n");
-            }
-        }
-
-        JOptionPane.showMessageDialog(this,
-                scores.toString(),
-                "Detailed Scores",
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    /**
-     * Get game controller
-     * @return Game controller
-     */
-    public GameController getGameController() {
-        return gameController;
     }
 }

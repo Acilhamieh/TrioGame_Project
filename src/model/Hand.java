@@ -7,10 +7,10 @@ import java.util.List;
 
 /**
  * Represents a student's hand of cards in Trio_UTBM.
- * Cards are kept sorted alphabetically by course code.
+ * Cards are kept sorted by ID (HIGHEST to LOWEST: 12 → 1).
  *
  * @author Dana SLEIMAN
- * @version 1.0
+ * @version 2.0 - Sorting by ID for memory game
  */
 public class Hand {
     private List<Card> cards;
@@ -26,7 +26,7 @@ public class Hand {
     }
 
     /**
-     * Add a card to the hand and sort
+     * Add a card to the hand and sort by ID (highest to lowest)
      * @param card The card to add
      */
     public void addCard(Card card) {
@@ -70,13 +70,15 @@ public class Hand {
     }
 
     /**
-     * Sort cards alphabetically by course code
+     * Sort cards by ID (HIGHEST to LOWEST: 12 → 1)
+     * This ensures predictable order for memory game
      */
     private void sortCards() {
         Collections.sort(cards, new Comparator<Card>() {
             @Override
             public int compare(Card c1, Card c2) {
-                return c1.getCourseCode().compareTo(c2.getCourseCode());
+                // Sort descending: highest ID first
+                return Integer.compare(c2.getId(), c1.getId());
             }
         });
     }
@@ -99,7 +101,7 @@ public class Hand {
 
     /**
      * Get all cards in hand (defensive copy)
-     * @return List of all cards
+     * @return List of all cards (sorted by ID)
      */
     public List<Card> getAllCards() {
         return new ArrayList<>(cards);
@@ -121,12 +123,43 @@ public class Hand {
         cards.clear();
     }
 
+    /**
+     * Get the first card (highest ID) - always visible
+     * @return First card or null if empty
+     */
+    public Card getFirstCard() {
+        return cards.isEmpty() ? null : cards.get(0);
+    }
+
+    /**
+     * Get the last card (lowest ID) - always visible
+     * @return Last card or null if empty
+     */
+    public Card getLastCard() {
+        return cards.isEmpty() ? null : cards.get(cards.size() - 1);
+    }
+
+    /**
+     * Check if a card at position should be visible
+     * Only first and last cards are visible in memory game mode
+     * @param index The position (0-based)
+     * @return true if should be visible
+     */
+    public boolean isCardVisible(int index) {
+        if (cards.isEmpty()) return false;
+        return (index == 0) || (index == cards.size() - 1);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Hand (").append(cards.size()).append(" cards): ");
         for (int i = 0; i < cards.size(); i++) {
-            sb.append(cards.get(i).getCourseCode());
+            if (isCardVisible(i)) {
+                sb.append(cards.get(i).toString());
+            } else {
+                sb.append("[?]");
+            }
             if (i < cards.size() - 1) {
                 sb.append(", ");
             }

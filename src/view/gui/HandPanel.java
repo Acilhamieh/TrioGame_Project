@@ -8,14 +8,15 @@ import java.util.List;
 
 /**
  * Panel displaying the current player's hand.
- * Shows cards in a horizontal layout.
+ * MEMORY GAME: Shows first & last cards visible, middle hidden
  *
- * @author Acil HAMIEH
- * @version 1.0
+ * @author Acil HAMIEH, Dana SLEIMAN
+ * @version 2.0 - Memory game support
  */
 public class HandPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
     private List<CardComponent> cardComponents;
+    private Hand currentHand;
 
     /**
      * Constructor for HandPanel
@@ -29,7 +30,7 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
         setBackground(new Color(220, 220, 220));
         setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
-                "Your Hand",
+                "Your Hand (All Visible to You)",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
                 new Font("SansSerif", Font.BOLD, 16)
@@ -39,16 +40,51 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
 
     /**
      * Update display with current hand
+     * Shows ONLY first and last cards, hides middle
      * @param hand Player's hand
      */
     public void updateDisplay(Hand hand) {
+        this.currentHand = hand;
+
         // Clear existing cards
         removeAll();
         cardComponents.clear();
 
-        // Add cards
-        for (Card card : hand.getAllCards()) {
-            CardComponent cardComp = new CardComponent(card, this);
+        List<Card> cards = hand.getAllCards();
+
+        // Add cards with visibility rules
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+            boolean visible = hand.isCardVisible(i); // First & last only
+
+            CardComponent cardComp = new CardComponent(card, this, visible, i);
+            cardComponents.add(cardComp);
+            add(cardComp);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Update display with ALL cards visible (for current player's own hand)
+     * MEMORY GAME FIX: You can see ALL your own cards!
+     * @param hand Player's hand
+     */
+    public void updateDisplayAllVisible(Hand hand) {
+        this.currentHand = hand;
+
+        // Clear existing cards
+        removeAll();
+        cardComponents.clear();
+
+        List<Card> cards = hand.getAllCards();
+
+        // Add cards - ALL VISIBLE
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+
+            CardComponent cardComp = new CardComponent(card, this, true, i); // ALL VISIBLE!
             cardComponents.add(cardComp);
             add(cardComp);
         }
@@ -66,13 +102,36 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
         }
     }
 
-    @Override
-    public void onCardSelected(Card card) {
-        gamePanel.onCardSelected(card, true);
+    /**
+     * Get selected card count
+     * @return Number of selected cards
+     */
+    public int getSelectedCount() {
+        int count = 0;
+        for (CardComponent cardComp : cardComponents) {
+            if (cardComp.isSelected()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Get all card components
+     * @return List of card components
+     */
+    public List<CardComponent> getCardComponents() {
+        return new ArrayList<>(cardComponents);
     }
 
     @Override
-    public void onCardDeselected(Card card) {
-        gamePanel.onCardDeselected(card);
+    public void onCardSelected(Card card, int position) {
+        // NEW: Pass position to GamePanel
+        gamePanel.onHandCardSelected(card, position);
+    }
+
+    @Override
+    public void onCardDeselected(Card card, int position) {
+        gamePanel.onCardDeselected(card, position);
     }
 }

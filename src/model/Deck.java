@@ -8,10 +8,10 @@ import java.util.List;
 
 /**
  * Represents the deck of 36 cards in Trio_UTBM.
- * Contains UTBM courses distributed across branches.
+ * Contains 12 different courses, each with unique ID (1-12).
  *
  * @author Dana SLEIMAN
- * @version 1.0
+ * @version 2.0 - Added ID system
  */
 public class Deck {
     private List<Card> cards;
@@ -19,7 +19,7 @@ public class Deck {
 
     /**
      * Constructor for the deck
-     * @param difficulty The difficulty level (affects gameplay, not deck composition)
+     * @param difficulty The difficulty level
      */
     public Deck(Difficulty difficulty) {
         this.difficulty = difficulty;
@@ -28,46 +28,48 @@ public class Deck {
     }
 
     /**
-     * Initialize the deck with 36 cards according to game rules:
-     * - 11 different courses, each appearing 3 times
-     * - PFE appears 3 times
-     * Total: 36 cards
+     * Initialize the deck with 36 cards with IDs:
+     * SY41 → ID: 12, IA41 → ID: 11, SY48 → ID: 10, AP4B → ID: 9
+     * GI21 → ID: 8, GI28 → ID: 7, GI41 → ID: 6
+     * MQ18 → ID: 5, MQ41 → ID: 4, MQ51 → ID: 3
+     * EN21 → ID: 2, PFE → ID: 1
+     *
+     * Each course appears 3 times, total 36 cards
      */
     private void initialize() {
-        // Computer Science courses (3 cards each)
-        addCourseCards("SY41", Branch.COMPUTER_SCIENCE, 3);
-        addCourseCards("IA41", Branch.COMPUTER_SCIENCE, 3);
-        addCourseCards("SY48", Branch.COMPUTER_SCIENCE, 3);
-        addCourseCards("AP4B", Branch.COMPUTER_SCIENCE, 3);
+        // Computer Science courses (IDs: 12, 11, 10, 9)
+        addCourseCards("SY41", Branch.COMPUTER_SCIENCE, 12, 3);
+        addCourseCards("IA41", Branch.COMPUTER_SCIENCE, 11, 3);
+        addCourseCards("SY48", Branch.COMPUTER_SCIENCE, 10, 3);
+        addCourseCards("AP4B", Branch.COMPUTER_SCIENCE, 9, 3);
 
-        // Industrial Engineering courses (3 cards each)
-        addCourseCards("GI40", Branch.INDUSTRIAL_ENGINEERING, 3);
-        addCourseCards("QO40", Branch.INDUSTRIAL_ENGINEERING, 3);
+        // Industrial Engineering courses (IDs: 8, 7, 6)
+        addCourseCards("GI21", Branch.INDUSTRIAL_ENGINEERING, 8, 3);
+        addCourseCards("GI28", Branch.INDUSTRIAL_ENGINEERING, 7, 3);
+        addCourseCards("GI41", Branch.INDUSTRIAL_ENGINEERING, 6, 3);
 
-        // Mechanical Engineering courses (3 cards each)
-        addCourseCards("MQ40", Branch.MECHANICAL_ENGINEERING, 3);
-        addCourseCards("TN40", Branch.MECHANICAL_ENGINEERING, 3);
+        // Mechanical Engineering courses (IDs: 5, 4, 3)
+        addCourseCards("MQ18", Branch.MECHANICAL_ENGINEERING, 5, 3);
+        addCourseCards("MQ41", Branch.MECHANICAL_ENGINEERING, 4, 3);
+        addCourseCards("MQ51", Branch.MECHANICAL_ENGINEERING, 3, 3);
 
-        // Energy Engineering courses (3 cards each)
-        addCourseCards("ER40", Branch.ENERGY_ENGINEERING, 3);
-        addCourseCards("TF40", Branch.ENERGY_ENGINEERING, 3);
+        // Energy Engineering courses (ID: 2)
+        addCourseCards("EN21", Branch.ENERGY_ENGINEERING, 2, 3);
 
-        // Mixed/General courses (3 cards each)
-        addCourseCards("MT40", Branch.MECHANICAL_ENGINEERING, 3);
-
-        // PFE - Final Project (3 cards)
-        addCourseCards("PFE", Branch.SPECIAL, 3);
+        // PFE - Final Project (ID: 1)
+        addCourseCards("PFE", Branch.SPECIAL, 1, 3);
     }
 
     /**
-     * Helper method to add multiple cards of the same course
+     * Helper method to add multiple cards of the same course with ID
      * @param courseCode The course code
      * @param branch The branch
-     * @param count Number of cards to add
+     * @param id The card ID (1-12)
+     * @param count Number of cards to add (should be 3)
      */
-    private void addCourseCards(String courseCode, Branch branch, int count) {
+    private void addCourseCards(String courseCode, Branch branch, int id, int count) {
         for (int i = 0; i < count; i++) {
-            cards.add(new Card(courseCode, branch));
+            cards.add(new Card(courseCode, branch, id));
         }
     }
 
