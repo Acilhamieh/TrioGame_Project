@@ -10,9 +10,10 @@ import java.util.List;
 /**
  * Main game panel for Trio_UTBM memory game.
  * NEW RULES: Select 1 from hand + 1 from ANY other player + 1 from hall
+ * RESPONSIVE: Adapts to different screen sizes
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.1 - Fixed layout for visible lecture hall
+ * @version 3.2 - Responsive design
  */
 public class GamePanel extends JPanel {
     private MainWindow mainWindow;
@@ -21,7 +22,7 @@ public class GamePanel extends JPanel {
     // UI Components
     private JPanel topPanel;
     private HandPanel handPanel;
-    private OtherPlayersPanel otherPlayersPanel;  // NEW! Shows ALL other players
+    private OtherPlayersPanel otherPlayersPanel;
     private LectureHallPanel lectureHallPanel;
     private JPanel controlPanel;
 
@@ -35,12 +36,12 @@ public class GamePanel extends JPanel {
     private JLabel scoreLabel;
     private JLabel instructionLabel;
 
-    // Selection tracking - NEW SYSTEM
+    // Selection tracking
     private Card selectedFromHand = null;
     private int selectedHandPosition = -1;
     private Card selectedFromOtherPlayer = null;
     private int selectedOtherPlayerPosition = -1;
-    private String selectedOtherPlayerName = null;  // Track which player
+    private String selectedOtherPlayerName = null;
     private Card selectedFromHall = null;
     private int selectedHallPosition = -1;
 
@@ -53,42 +54,58 @@ public class GamePanel extends JPanel {
         this.mainWindow = mainWindow;
         this.controller = controller;
 
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(5, 5));
         setBackground(new Color(245, 245, 245));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         initializeComponents();
         updateDisplay();
     }
 
     /**
-     * Initialize all UI components
-     * FIXED: Use GridLayout for equal space distribution
+     * Initialize all UI components - RESPONSIVE
      */
     private void initializeComponents() {
         // Top panel (player info)
         createTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
-        // Center panel - FIXED: Use GridLayout(3 rows) for equal space
-        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        // Center panel - RESPONSIVE with proportional sizing
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false);
 
-        // Other players' hands (top) - with scroll if needed
+        // Other players' hands (top) - scrollable, min height
         otherPlayersPanel = new OtherPlayersPanel(this);
         JScrollPane otherPlayersScroll = new JScrollPane(otherPlayersPanel);
-        otherPlayersScroll.setPreferredSize(new Dimension(0, 220));
         otherPlayersScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         otherPlayersScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         otherPlayersScroll.setBorder(null);
+        // Set min/max heights for flexibility
+        otherPlayersScroll.setMinimumSize(new Dimension(0, 150));
+        otherPlayersScroll.setPreferredSize(new Dimension(0, 180));
+        otherPlayersScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         centerPanel.add(otherPlayersScroll);
 
-        // Lecture hall (middle) - NOW HAS EQUAL SPACE!
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+        // Lecture hall (middle) - FLEXIBLE, takes available space
         lectureHallPanel = new LectureHallPanel(this);
-        centerPanel.add(lectureHallPanel);
+        lectureHallPanel.setMinimumSize(new Dimension(0, 200));
+        lectureHallPanel.setPreferredSize(new Dimension(0, 350));
+        // Add with flexible sizing
+        JPanel hallWrapper = new JPanel(new BorderLayout());
+        hallWrapper.setOpaque(false);
+        hallWrapper.add(lectureHallPanel, BorderLayout.CENTER);
+        centerPanel.add(hallWrapper);
+
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 
         // Your hand (bottom)
         handPanel = new HandPanel(this);
+        handPanel.setMinimumSize(new Dimension(0, 120));
+        handPanel.setPreferredSize(new Dimension(0, 135));
+        handPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
         centerPanel.add(handPanel);
 
         add(centerPanel, BorderLayout.CENTER);
@@ -96,63 +113,96 @@ public class GamePanel extends JPanel {
         // Control panel
         createControlPanel();
         add(controlPanel, BorderLayout.SOUTH);
+
+        // Add component listener to handle resizing
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                adjustLayoutForSize();
+            }
+        });
     }
 
     /**
-     * Create top panel with player info
+     * Adjust layout based on window size - RESPONSIVE
+     */
+    private void adjustLayoutForSize() {
+        int height = getHeight();
+
+        // Adjust component sizes based on available height
+        if (height < 700) {
+            // Small screen - compact mode
+            otherPlayersPanel.setCompactMode(true);
+            handPanel.setPreferredSize(new Dimension(0, 120));
+        } else if (height < 900) {
+            // Medium screen - normal mode
+            otherPlayersPanel.setCompactMode(false);
+            handPanel.setPreferredSize(new Dimension(0, 135));
+        } else {
+            // Large screen - spacious mode
+            otherPlayersPanel.setCompactMode(false);
+            handPanel.setPreferredSize(new Dimension(0, 145));
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Create top panel with player info - RESPONSIVE
      */
     private void createTopPanel() {
         topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(70, 130, 180));
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
 
         // Left: Player name
         playerLabel = new JLabel("Player: Loading...");
-        playerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        playerLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         playerLabel.setForeground(Color.WHITE);
         topPanel.add(playerLabel, BorderLayout.WEST);
 
         // Center: Instructions
-        instructionLabel = new JLabel("Select: 1 from YOUR hand + 1 from ANY other player + 1 from HALL");
-        instructionLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        instructionLabel = new JLabel("Select: 1 from hand + 1 from other + 1 from hall");
+        instructionLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         instructionLabel.setForeground(Color.WHITE);
         instructionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(instructionLabel, BorderLayout.CENTER);
 
         // Right: Score
         scoreLabel = new JLabel("ECTS: 0 | Trios: 0");
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         scoreLabel.setForeground(Color.WHITE);
         topPanel.add(scoreLabel, BorderLayout.EAST);
     }
 
     /**
-     * Create control panel with buttons
+     * Create control panel with buttons - RESPONSIVE
      */
     private void createControlPanel() {
-        controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 8));
         controlPanel.setBackground(new Color(220, 220, 220));
 
         // Form Trio button
         formTrioButton = new JButton("Form Trio");
-        formTrioButton.setFont(new Font("SansSerif", Font.BOLD, 16));
-        formTrioButton.setPreferredSize(new Dimension(150, 40));
+        formTrioButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        formTrioButton.setPreferredSize(new Dimension(130, 35));
         formTrioButton.setEnabled(false);
         formTrioButton.addActionListener(e -> formTrio());
         controlPanel.add(formTrioButton);
 
         // Clear Selection button
         clearSelectionButton = new JButton("Clear Selection");
-        clearSelectionButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        clearSelectionButton.setPreferredSize(new Dimension(150, 40));
+        clearSelectionButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        clearSelectionButton.setPreferredSize(new Dimension(130, 35));
         clearSelectionButton.addActionListener(e -> clearAllSelections());
         controlPanel.add(clearSelectionButton);
 
         // Quit button
-        quitButton = new JButton("Quit Game");
-        quitButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        quitButton.setPreferredSize(new Dimension(120, 40));
-        quitButton.setBackground(new Color(220, 20, 60)); // Crimson
+        quitButton = new JButton("Quit");
+        quitButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        quitButton.setPreferredSize(new Dimension(100, 35));
+        quitButton.setBackground(new Color(220, 20, 60));
         quitButton.setForeground(Color.WHITE);
         quitButton.addActionListener(e -> {
             if (mainWindow != null) {
@@ -164,7 +214,6 @@ public class GamePanel extends JPanel {
 
     /**
      * Update entire display
-     * FIXED: Show ALL cards in own hand, show all other players
      */
     public void updateDisplay() {
         Student currentPlayer = controller.getCurrentPlayer();
@@ -178,7 +227,7 @@ public class GamePanel extends JPanel {
         // Update own hand - SHOW ALL CARDS
         handPanel.updateDisplayAllVisible(currentPlayer.getHand());
 
-        // Update other players' hands - NEW! Show ALL other players
+        // Update other players' hands
         List<Student> allPlayers = controller.getGame().getStudents();
         otherPlayersPanel.updateDisplay(allPlayers, currentPlayer);
 
@@ -189,53 +238,34 @@ public class GamePanel extends JPanel {
         clearAllSelections();
     }
 
-    /**
-     * Handle card selected from YOUR hand
-     */
     public void onHandCardSelected(Card card, int position) {
-        // Only allow 1 card from hand
         if (selectedFromHand != null && !selectedFromHand.equals(card)) {
             clearHandSelection();
         }
-
         selectedFromHand = card;
         selectedHandPosition = position;
         updateSelectionStatus();
     }
 
-    /**
-     * Handle card selected from ANY other player's hand
-     * NEW METHOD for showing all players
-     */
     public void onOtherPlayerCardSelected(Card card, int position, String playerName) {
-        // Only allow 1 card from other players
         if (selectedFromOtherPlayer != null && !selectedFromOtherPlayer.equals(card)) {
             clearOtherPlayersSelection();
         }
-
         selectedFromOtherPlayer = card;
         selectedOtherPlayerPosition = position;
         selectedOtherPlayerName = playerName;
         updateSelectionStatus();
     }
 
-    /**
-     * Handle card selected from LECTURE HALL
-     */
     public void onHallCardSelected(Card card, int position) {
-        // Only allow 1 card from hall
         if (selectedFromHall != null && !selectedFromHall.equals(card)) {
             clearHallSelection();
         }
-
         selectedFromHall = card;
         selectedHallPosition = position;
         updateSelectionStatus();
     }
 
-    /**
-     * Handle card deselected
-     */
     public void onCardDeselected(Card card, int position) {
         if (card.equals(selectedFromHand)) {
             selectedFromHand = null;
@@ -251,17 +281,13 @@ public class GamePanel extends JPanel {
         updateSelectionStatus();
     }
 
-    /**
-     * Update selection status and button state
-     */
     private void updateSelectionStatus() {
         int selectedCount = 0;
         if (selectedFromHand != null) selectedCount++;
         if (selectedFromOtherPlayer != null) selectedCount++;
         if (selectedFromHall != null) selectedCount++;
 
-        // Update instruction label
-        StringBuilder instruction = new StringBuilder("Selected: ");
+        StringBuilder instruction = new StringBuilder();
         if (selectedFromHand != null) {
             instruction.append("✅ Hand(").append(selectedFromHand.getCourseCode()).append(") ");
         } else {
@@ -270,7 +296,7 @@ public class GamePanel extends JPanel {
         if (selectedFromOtherPlayer != null) {
             instruction.append("✅ ").append(selectedOtherPlayerName).append("(").append(selectedFromOtherPlayer.getCourseCode()).append(") ");
         } else {
-            instruction.append("❌ Other Player ");
+            instruction.append("❌ Other ");
         }
         if (selectedFromHall != null) {
             instruction.append("✅ Hall(").append(selectedFromHall.getCourseCode()).append(")");
@@ -279,27 +305,17 @@ public class GamePanel extends JPanel {
         }
 
         instructionLabel.setText(instruction.toString());
-
-        // Enable form trio button only when all 3 selected
         formTrioButton.setEnabled(selectedCount == 3);
     }
 
-    /**
-     * Form trio with selected cards
-     * NEW: Uses 1 from hand + 1 from ANY other player + 1 from hall
-     */
     private void formTrio() {
         if (selectedFromHand == null || selectedFromOtherPlayer == null || selectedFromHall == null) {
             JOptionPane.showMessageDialog(this,
-                    "Please select:\n" +
-                            "- 1 card from YOUR hand\n" +
-                            "- 1 card from ANY other player\n" +
-                            "- 1 card from HALL",
-                    "Incomplete Selection", JOptionPane.WARNING_MESSAGE);
+                    "Select: 1 from hand + 1 from other + 1 from hall",
+                    "Incomplete", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Find the selected other player
         Student currentPlayer = controller.getCurrentPlayer();
         Student selectedPlayer = null;
         for (Student player : controller.getGame().getStudents()) {
@@ -311,19 +327,17 @@ public class GamePanel extends JPanel {
 
         if (selectedPlayer == null) {
             JOptionPane.showMessageDialog(this,
-                    "Error: Could not find player " + selectedOtherPlayerName,
+                    "Error: Player not found",
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Create list: [from hand, from other player, from hall]
         List<Card> selectedCards = Arrays.asList(
                 selectedFromHand,
                 selectedFromOtherPlayer,
                 selectedFromHall
         );
 
-        // Execute turn with validation
         boolean success = controller.getGame().playTurnWithPlayer(
                 currentPlayer,
                 selectedPlayer,
@@ -331,32 +345,19 @@ public class GamePanel extends JPanel {
         );
 
         if (success) {
-            // Valid trio!
             JOptionPane.showMessageDialog(this,
-                    "Valid Trio! " + selectedFromHand.getCourseCode() + " × 3\n" +
-                            "+2 ECTS! You get a BONUS TURN!",
+                    "Valid Trio! " + selectedFromHand.getCourseCode() + " × 3\n+2 ECTS! Bonus turn!",
                     "Success!", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            // Invalid trio
             JOptionPane.showMessageDialog(this,
-                    "Invalid Trio!\n" +
-                            "Cards: " + selectedFromHand.getCourseCode() + ", " +
-                            selectedFromOtherPlayer.getCourseCode() + ", " +
-                            selectedFromHall.getCourseCode() + "\n" +
-                            "Turn passes to next player.",
+                    "Invalid Trio! Turn passes.",
                     "Invalid", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Update display
         updateDisplay();
-
-        // Check victory
         checkVictory();
     }
 
-    /**
-     * Clear all selections
-     */
     private void clearAllSelections() {
         selectedFromHand = null;
         selectedHandPosition = -1;
@@ -373,18 +374,12 @@ public class GamePanel extends JPanel {
         updateSelectionStatus();
     }
 
-    /**
-     * Clear hand selection only
-     */
     private void clearHandSelection() {
         handPanel.clearSelection();
         selectedFromHand = null;
         selectedHandPosition = -1;
     }
 
-    /**
-     * Clear other players selection only
-     */
     private void clearOtherPlayersSelection() {
         otherPlayersPanel.clearSelection();
         selectedFromOtherPlayer = null;
@@ -392,30 +387,22 @@ public class GamePanel extends JPanel {
         selectedOtherPlayerName = null;
     }
 
-    /**
-     * Clear hall selection only
-     */
     private void clearHallSelection() {
         lectureHallPanel.clearSelection();
         selectedFromHall = null;
         selectedHallPosition = -1;
     }
 
-    /**
-     * Check for victory condition
-     */
     private void checkVictory() {
         Student winner = controller.getGame().checkVictoryConditions();
         if (winner != null) {
             JOptionPane.showMessageDialog(this,
                     "🎉 CONGRATULATIONS! 🎉\n\n" +
-                            winner.getName() + " has graduated!\n" +
-                            "Total ECTS: " + winner.getEctsCredits() + "\n" +
-                            "Trios completed: " + winner.getTrioCount(),
-                    "Game Over - Victory!",
+                            winner.getName() + " graduated!\n" +
+                            "ECTS: " + winner.getEctsCredits() + " | Trios: " + winner.getTrioCount(),
+                    "Victory!",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            // Disable buttons
             formTrioButton.setEnabled(false);
             clearSelectionButton.setEnabled(false);
         }

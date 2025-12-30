@@ -21,6 +21,7 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
     private GamePanel gamePanel;
     private Map<String, List<CardComponent>> playerCardComponents;
     private List<JPanel> playerHandPanels;
+    private boolean compactMode = false;  // NEW: Compact mode flag
 
     /**
      * Constructor for OtherPlayersPanel
@@ -35,11 +36,19 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         setBackground(new Color(230, 240, 250)); // Light blue
         setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
-                "Other Players' Hands (First & Last Visible)",
+                "Other Players' Hands",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 14)  // REDUCED from 16
+                new Font("SansSerif", Font.BOLD, 13)
         ));
+    }
+
+    /**
+     * Set compact mode for small screens
+     * @param compact true for compact mode
+     */
+    public void setCompactMode(boolean compact) {
+        this.compactMode = compact;
     }
 
     /**
@@ -68,27 +77,30 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
     }
 
     /**
-     * Create a panel for one player's hand - COMPACT
+     * Create a panel for one player's hand - RESPONSIVE
      * @param player The player
      * @return Panel showing their hand
      */
     private JPanel createPlayerHandPanel(Student player) {
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(3, 3));  // REDUCED from 5
+        int padding = compactMode ? 3 : 5;
+        panel.setLayout(new BorderLayout(padding, padding));
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY, 1),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)  // REDUCED from 10
+                BorderFactory.createEmptyBorder(padding, padding, padding, padding)
         ));
 
         // Player name label
         JLabel nameLabel = new JLabel(player.getName() + " (" + player.getHand().getSize() + " cards)");
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 12));  // REDUCED from 14
+        int fontSize = compactMode ? 11 : 12;
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, fontSize));
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(nameLabel, BorderLayout.NORTH);
 
         // Cards panel
-        JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));  // REDUCED from 5
+        int cardGap = compactMode ? 3 : 4;
+        JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, cardGap, cardGap));
         cardsPanel.setBackground(Color.WHITE);
 
         Hand hand = player.getHand();

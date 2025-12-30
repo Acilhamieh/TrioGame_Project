@@ -41,15 +41,21 @@ public class MainWindow extends JFrame {
     }
 
     /**
-     * Initialize window properties
+     * Initialize window properties - RESPONSIVE
      */
     private void initializeWindow() {
         setTitle(TITLE);
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        // Get screen size for responsive sizing
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = Math.min(1400, (int)(screenSize.width * 0.9));
+        int height = Math.min(900, (int)(screenSize.height * 0.9));
+
+        setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center on screen
         setResizable(true);
-        setMinimumSize(new Dimension(1200, 800));
+        setMinimumSize(new Dimension(1000, 650)); // Minimum size for playability
     }
 
     /**
