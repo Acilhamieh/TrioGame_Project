@@ -7,30 +7,38 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Visual component representing a single card.
- * Supports MEMORY GAME: Can be hidden or visible, displays ID
+ * Custom component for displaying a card in the GUI.
+ * MEMORY GAME: Shows/hides cards, displays ID
+ * SIMPLIFIED: No icon, more space for text
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 2.0 - Memory game support
+ * @version 2.2 - Removed icon for better visibility
  */
 public class CardComponent extends JPanel {
     private Card card;
     private boolean selected;
     private boolean hovered;
-    private boolean visible;  // NEW: Can be hidden [?]
-    private int positionIndex; // NEW: Position in hand for selection
     private CardSelectionListener listener;
+    private boolean visible;  // NEW: Is this card visible or hidden?
+    private int positionIndex;  // NEW: Position in hand
 
     // Colors
-    private static final Color NORMAL_BG = Color.WHITE;
-    private static final Color SELECTED_BG = new Color(144, 238, 144); // Light Green
-    private static final Color HOVER_BG = new Color(230, 230, 250); // Lavender
-    private static final Color BORDER_COLOR = new Color(100, 100, 100);
-    private static final Color SELECTED_BORDER = new Color(34, 139, 34); // Forest Green
-    private static final Color HIDDEN_BG = new Color(200, 200, 200); // Gray for hidden cards
+    private static final Color NORMAL_BG = new Color(255, 255, 255);
+    private static final Color HIDDEN_BG = new Color(200, 200, 200);
+    private static final Color SELECTED_BG = new Color(144, 238, 144);  // Light green
+    private static final Color HOVER_BG = new Color(230, 230, 250);     // Lavender
+    private static final Color BORDER_COLOR = Color.DARK_GRAY;
 
     /**
-     * Constructor for CardComponent (always visible - for lecture hall)
+     * Interface for card selection listeners
+     */
+    public interface CardSelectionListener {
+        void onCardSelected(Card card, int position);
+        void onCardDeselected(Card card, int position);
+    }
+
+    /**
+     * Constructor for always-visible cards (lecture hall)
      * @param card The card to display
      * @param listener Selection listener
      */
@@ -42,7 +50,7 @@ public class CardComponent extends JPanel {
      * Constructor with visibility control (for hands)
      * @param card The card to display
      * @param listener Selection listener
-     * @param visible Whether card face is visible
+     * @param visible Is this card visible?
      * @param positionIndex Position in hand (0-8)
      */
     public CardComponent(Card card, CardSelectionListener listener, boolean visible, int positionIndex) {
@@ -58,70 +66,68 @@ public class CardComponent extends JPanel {
     }
 
     /**
-     * Setup component properties
+     * Setup component properties - SIMPLIFIED without icon
      */
     private void setupComponent() {
-        setPreferredSize(new Dimension(80, 110));
+        setPreferredSize(new Dimension(90, 110));  // Slightly smaller now
         setBackground(visible ? NORMAL_BG : HIDDEN_BG);
         setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 2));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Add content
         createContent();
     }
 
     /**
-     * Create card content (visible or hidden)
+     * Create card content based on visibility
      */
     private void createContent() {
-        removeAll(); // Clear previous content
-
-        if (visible && card != null) {
-            // VISIBLE CARD: Show all details
+        if (visible) {
             createVisibleCard();
         } else {
-            // HIDDEN CARD: Show [?]
             createHiddenCard();
         }
     }
 
     /**
-     * Create visible card with ID
+     * Create visible card - SIMPLIFIED without icon
      */
     private void createVisibleCard() {
-        // Top: Branch icon + ID
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setOpaque(false);
+        // Add vertical glue for centering
+        add(Box.createVerticalGlue());
 
-        JLabel iconLabel = new JLabel(getBranchIcon(card.getBranch()), SwingConstants.CENTER);
-        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
-        topPanel.add(iconLabel, BorderLayout.CENTER);
-
-        // ID badge
+        // ID badge (top)
         JLabel idLabel = new JLabel("ID:" + card.getId());
-        idLabel.setFont(new Font("SansSerif", Font.BOLD, 9));
+        idLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
         idLabel.setForeground(new Color(100, 100, 100));
-        idLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        topPanel.add(idLabel, BorderLayout.SOUTH);
+        idLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(idLabel);
 
-        add(topPanel, BorderLayout.NORTH);
+        add(Box.createRigidArea(new Dimension(0, 8)));
 
-        // Center: Course code
-        JLabel codeLabel = new JLabel(card.getCourseCode(), SwingConstants.CENTER);
-        codeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        add(codeLabel, BorderLayout.CENTER);
+        // Course code (MAIN - BIG AND CLEAR!)
+        JLabel codeLabel = new JLabel(card.getCourseCode());
+        codeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        codeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(codeLabel);
 
-        // Bottom: Branch abbreviation
-        JLabel branchLabel = new JLabel(getBranchAbbr(card.getBranch()), SwingConstants.CENTER);
-        branchLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        add(Box.createRigidArea(new Dimension(0, 8)));
+
+        // Branch abbreviation
+        JLabel branchLabel = new JLabel(getBranchAbbr(card.getBranch()));
+        branchLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         branchLabel.setForeground(Color.GRAY);
-        add(branchLabel, BorderLayout.SOUTH);
+        branchLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(branchLabel);
+
+        // Add vertical glue for centering
+        add(Box.createVerticalGlue());
 
         // Special styling for PFE cards
         if (card.isPFE()) {
             codeLabel.setForeground(new Color(255, 215, 0)); // Gold
-            iconLabel.setForeground(new Color(255, 215, 0));
+            branchLabel.setForeground(new Color(218, 165, 32)); // Goldenrod
         }
     }
 
@@ -129,33 +135,54 @@ public class CardComponent extends JPanel {
      * Create hidden card [?]
      */
     private void createHiddenCard() {
-        // Show [?] and position
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setOpaque(false);
+        // Add vertical glue for centering
+        add(Box.createVerticalGlue());
 
-        JLabel questionLabel = new JLabel("?", SwingConstants.CENTER);
+        // Big question mark
+        JLabel questionLabel = new JLabel("?");
         questionLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
         questionLabel.setForeground(new Color(150, 150, 150));
-        centerPanel.add(questionLabel, BorderLayout.CENTER);
+        questionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(questionLabel);
 
         // Show position number
         if (positionIndex >= 0) {
-            JLabel posLabel = new JLabel("Pos: " + positionIndex, SwingConstants.CENTER);
-            posLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            add(Box.createRigidArea(new Dimension(0, 5)));
+            JLabel posLabel = new JLabel("Pos: " + positionIndex);
+            posLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
             posLabel.setForeground(new Color(100, 100, 100));
-            centerPanel.add(posLabel, BorderLayout.SOUTH);
+            posLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            add(posLabel);
         }
 
-        add(centerPanel, BorderLayout.CENTER);
-
-        setBackground(HIDDEN_BG);
+        // Add vertical glue for centering
+        add(Box.createVerticalGlue());
     }
 
     /**
-     * Setup mouse listeners for hover and click
+     * Get branch abbreviation
+     */
+    private String getBranchAbbr(Branch branch) {
+        switch (branch) {
+            case COMPUTER_SCIENCE: return "CS";
+            case INDUSTRIAL_ENGINEERING: return "IE";
+            case MECHANICAL_ENGINEERING: return "ME";
+            case ENERGY_ENGINEERING: return "EE";
+            case SPECIAL: return "PFE";
+            default: return "";
+        }
+    }
+
+    /**
+     * Setup mouse listeners for selection
      */
     private void setupMouseListeners() {
         addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                toggleSelection();
+            }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (!selected) {
@@ -169,16 +196,11 @@ public class CardComponent extends JPanel {
                 hovered = false;
                 updateAppearance();
             }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                toggleSelection();
-            }
         });
     }
 
     /**
-     * Toggle card selection
+     * Toggle selection state
      */
     private void toggleSelection() {
         selected = !selected;
@@ -194,56 +216,12 @@ public class CardComponent extends JPanel {
     }
 
     /**
-     * Set selection state programmatically
-     * @param selected Selection state
-     */
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-        updateAppearance();
-    }
-
-    /**
-     * Check if card is selected
-     * @return True if selected
-     */
-    public boolean isSelected() {
-        return selected;
-    }
-
-    /**
-     * Set visibility of card face
-     * @param visible True to show card, false to show [?]
-     */
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-        createContent();
-        revalidate();
-        repaint();
-    }
-
-    /**
-     * Check if card face is visible
-     * @return True if visible
-     */
-    public boolean isCardVisible() {
-        return visible;
-    }
-
-    /**
-     * Get position index
-     * @return Position in hand
-     */
-    public int getPositionIndex() {
-        return positionIndex;
-    }
-
-    /**
      * Update visual appearance based on state
      */
     private void updateAppearance() {
         if (selected) {
             setBackground(SELECTED_BG);
-            setBorder(BorderFactory.createLineBorder(SELECTED_BORDER, 3));
+            setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
         } else if (hovered) {
             setBackground(HOVER_BG);
             setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 2));
@@ -255,62 +233,52 @@ public class CardComponent extends JPanel {
     }
 
     /**
-     * Get card instance
-     * @return The card
+     * Set selection state programmatically
+     */
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+        updateAppearance();
+    }
+
+    /**
+     * Check if card is selected
+     */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * Get the card
      */
     public Card getCard() {
         return card;
     }
 
     /**
-     * Get branch icon emoji
-     * @param branch Card branch
-     * @return Icon string
+     * Set card visibility (show/hide)
      */
-    private String getBranchIcon(Branch branch) {
-        switch (branch) {
-            case COMPUTER_SCIENCE:
-                return "💻";
-            case INDUSTRIAL_ENGINEERING:
-                return "🏭";
-            case MECHANICAL_ENGINEERING:
-                return "⚙️";
-            case ENERGY_ENGINEERING:
-                return "⚡";
-            case SPECIAL:
-                return "⭐";
-            default:
-                return "📚";
+    public void setVisible(boolean visible) {
+        if (this.visible != visible) {
+            this.visible = visible;
+            // Rebuild content
+            removeAll();
+            createContent();
+            revalidate();
+            repaint();
         }
     }
 
     /**
-     * Get branch abbreviation
-     * @param branch Card branch
-     * @return Abbreviation
+     * Check if card is visible
      */
-    private String getBranchAbbr(Branch branch) {
-        switch (branch) {
-            case COMPUTER_SCIENCE:
-                return "CS";
-            case INDUSTRIAL_ENGINEERING:
-                return "IE";
-            case MECHANICAL_ENGINEERING:
-                return "ME";
-            case ENERGY_ENGINEERING:
-                return "EE";
-            case SPECIAL:
-                return "PFE";
-            default:
-                return "???";
-        }
+    public boolean isCardVisible() {
+        return visible;
     }
 
     /**
-     * Interface for card selection events
+     * Get position index
      */
-    public interface CardSelectionListener {
-        void onCardSelected(Card card, int position);
-        void onCardDeselected(Card card, int position);
+    public int getPositionIndex() {
+        return positionIndex;
     }
 }
