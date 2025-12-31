@@ -8,14 +8,13 @@ import enums.GameMode;
  * A valid trio earns ECTS credits for the student/team.
  *
  * @author Dana SLEIMAN
- * @version 1.0
+ * @version 2.0 - FIXED: Removed cached branch, getBranch() returns actual card branch
  */
 public class Trio {
     private Card card1;
     private Card card2;
     private Card card3;
     private int ectsAwarded;
-    private Branch branch;
 
     /**
      * Constructor for a trio
@@ -27,7 +26,6 @@ public class Trio {
         this.card1 = card1;
         this.card2 = card2;
         this.card3 = card3;
-        this.branch = card1.getBranch();
         this.ectsAwarded = 0;
     }
 
@@ -123,11 +121,15 @@ public class Trio {
     }
 
     /**
-     * Get the branch of this trio
-     * @return The branch
+     * ✅ FIXED: Get the branch of this trio
+     * Returns the actual branch from the cards (not a cached value)
+     * All three cards in a valid trio have the same branch
+     * @return The branch of the trio cards
      */
     public Branch getBranch() {
-        return branch;
+        // Return the actual branch from card1
+        // (all three cards have same branch in a valid trio)
+        return card1.getBranch();
     }
 
     @Override

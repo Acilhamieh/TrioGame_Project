@@ -9,7 +9,7 @@ import java.util.List;
  * Students accumulate ECTS credits by forming trios.
  *
  * @author Acil HAMIEH
- * @version 1.1 - Added victory condition checking
+ * @version 1.2 - Fixed Advanced mode: PFE trios excluded from linked trio counting
  */
 public class Student {
     private String name;
@@ -92,8 +92,15 @@ public class Student {
     }
 
     /**
-     * NEW: Check if student has won 2 linked trios (Picante mode)
-     * Linked = same branch
+     * NEW: Check if student has won 2 linked trios (Advanced/Picante mode)
+     * Linked = same branch (EXCLUDING PFE trios)
+     *
+     * RULES:
+     * - CS + CS = WIN ✅
+     * - ME + ME = WIN ✅
+     * - CS + ME = NO WIN ❌
+     * - PFE trios don't count (they have instant-win rule)
+     *
      * @return true if has 2 trios from same branch
      */
     public boolean hasTwoLinkedTrios() {
@@ -101,19 +108,40 @@ public class Student {
             return false;
         }
 
-        // Count trios by branch
+        // DEBUG: Print all trios and their branches
+        System.out.println("=== CHECKING LINKED TRIOS FOR " + name + " ===");
+        for (Trio trio : completedTrios) {
+            System.out.println("  Trio: " + trio.getCard1().getCourseCode() +
+                    " x3, Branch: " + trio.getBranch());
+        }
+
+        // Count trios by branch (EXCLUDE PFE/SPECIAL!)
         int csCount = 0, ieCount = 0, meCount = 0, eeCount = 0;
 
         for (Trio trio : completedTrios) {
             Branch branch = trio.getBranch();
+
+            // ✅ CRITICAL FIX: Skip PFE trios (they have their own instant-win rule)
+            if (branch == Branch.SPECIAL) {
+                System.out.println("  Skipping PFE trio (special branch)");
+                continue;
+            }
+
             if (branch == Branch.COMPUTER_SCIENCE) csCount++;
             else if (branch == Branch.INDUSTRIAL_ENGINEERING) ieCount++;
             else if (branch == Branch.MECHANICAL_ENGINEERING) meCount++;
             else if (branch == Branch.ENERGY_ENGINEERING) eeCount++;
         }
 
+        System.out.println("  Branch counts: CS=" + csCount + ", IE=" + ieCount +
+                ", ME=" + meCount + ", EE=" + eeCount);
+
         // Check if any branch has 2+ trios
-        return csCount >= 2 || ieCount >= 2 || meCount >= 2 || eeCount >= 2;
+        boolean result = csCount >= 2 || ieCount >= 2 || meCount >= 2 || eeCount >= 2;
+        System.out.println("  Has 2 linked trios: " + result);
+        System.out.println("=== END CHECK ===");
+
+        return result;
     }
 
     /**
@@ -126,8 +154,15 @@ public class Student {
     }
 
     /**
-     * NEW: Check victory for picante mode
-     * Win: 2 linked trios OR trio of 7 (PFE)
+     * NEW: Check victory for Advanced/Picante mode
+     * Win: 2 linked trios (same branch) OR trio of 7 (PFE)
+     *
+     * EXAMPLES:
+     * - 2 CS trios = WIN ✅
+     * - 2 ME trios = WIN ✅
+     * - 1 CS + 1 ME = NO WIN ❌
+     * - 1 PFE trio = INSTANT WIN ✅
+     *
      * @return true if won
      */
     public boolean hasWonPicante() {
