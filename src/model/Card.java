@@ -6,10 +6,10 @@ import enums.Branch;
  * Represents a course card in Trio_UTBM.
  * Each card has a course code, branch, and unique ID for sorting.
  *
- * BACKWARD COMPATIBLE: Supports both old and new constructors
+ * CORRECTED IDs: PFE=7 (The 7), GI28=1
  *
  * @author Dana SLEIMAN, Acil HAMIEH
- * @version 2.1 - Backward compatible with ID system
+ * @version 2.2 - Corrected ID system
  */
 public class Card {
     private final String courseCode;
@@ -42,6 +42,7 @@ public class Card {
 
     /**
      * Auto-assign ID based on course code (for backward compatibility)
+     * CORRECTED: PFE=7, GI28=1
      * @param courseCode The course code
      * @return The corresponding ID (1-12)
      */
@@ -52,13 +53,13 @@ public class Card {
             case "SY48": return 10;
             case "AP4B": return 9;
             case "GI21": return 8;
-            case "GI28": return 7;
+            case "PFE":  return 7;  // CORRECTED: PFE = "The 7"
             case "GI41": return 6;
             case "MQ18": return 5;
             case "MQ41": return 4;
             case "MQ51": return 3;
             case "EN21": return 2;
-            case "PFE":  return 1;
+            case "GI28": return 1;  // CORRECTED: GI28 = 1
             default:     return 0;
         }
     }
@@ -88,11 +89,12 @@ public class Card {
     }
 
     /**
-     * Check if this is a PFE card (for old tests)
+     * Check if this is a PFE card
+     * PFE = ID:7 = "The 7" = Special victory card
      * @return true if this is a PFE card
      */
     public boolean isPFE() {
-        return "PFE".equalsIgnoreCase(courseCode);
+        return "PFE".equalsIgnoreCase(courseCode) || id == 7;
     }
 
     /**

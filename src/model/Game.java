@@ -7,10 +7,10 @@ import java.util.List;
 
 /**
  * Main game manager for Trio_UTBM.
- * NEW RULES: Trio = 1 from your hand + 1 from neighbor's hand + 1 from lecture hall
+ * FLEXIBLE RULES: Take ANY 3 cards from anywhere!
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 2.0 - Memory game with neighbor selection
+ * @version 3.0 - Flexible card selection
  */
 public class Game {
     private List<Student> students;
@@ -35,35 +35,25 @@ public class Game {
 
     /**
      * Configure the game with players and settings
-     * @param numPlayers Number of players (2-6)
-     * @param mode Game mode
-     * @param difficulty Difficulty level
-     * @param playerNames List of player names
      */
     public void configure(int numPlayers, GameMode mode, Difficulty difficulty, List<String> playerNames) {
         this.numberOfPlayers = numPlayers;
         this.gameMode = mode;
         this.difficulty = difficulty;
 
-        // Create students
         for (String name : playerNames) {
             Student student = new Student(name);
             students.add(student);
             scoreBoard.registerStudent(student);
         }
 
-        // Create teams if team mode
         if (mode.isTeamMode()) {
             createTeams();
         }
 
-        // Initialize turn manager
         this.turnManager = new TurnManager(students);
     }
 
-    /**
-     * Create teams for team mode
-     */
     private void createTeams() {
         for (int i = 0; i < students.size(); i += 2) {
             if (i + 1 < students.size()) {
@@ -113,7 +103,6 @@ public class Game {
                 lectureHallSize = 9;
         }
 
-        // Deal cards to players
         for (Student student : students) {
             for (int i = 0; i < cardsPerPlayer; i++) {
                 Card card = deck.dealCard();
@@ -123,7 +112,6 @@ public class Game {
             }
         }
 
-        // Fill lecture hall
         for (int i = 0; i < lectureHallSize; i++) {
             Card card = deck.dealCard();
             if (card != null) {
@@ -132,139 +120,153 @@ public class Game {
         }
     }
 
-    /**
-     * Start the game
-     */
     public void startGame() {
         System.out.println("Game started!");
         System.out.println("Mode: " + gameMode.getDisplayName());
         System.out.println("Players: " + numberOfPlayers);
     }
 
-    /**
-     * Get the neighbor (next player in turn order)
-     * @param student Current player
-     * @return The next player (neighbor)
-     */
     public Student getNeighbor(Student student) {
         int currentIndex = students.indexOf(student);
         if (currentIndex == -1) return null;
-
         int neighborIndex = (currentIndex + 1) % students.size();
         return students.get(neighborIndex);
     }
 
     /**
-     * Play a turn - NEW RULES!
-     * Student selects 3 cards:
-     * - 1 from OWN hand
-     * - 1 from ANY OTHER PLAYER's hand
-     * - 1 from LECTURE HALL
-     *
-     * @param student The student playing
-     * @param otherPlayer The other player whose card was selected
-     * @param selectedCards The 3 cards selected [0]=from own hand, [1]=from other player, [2]=from hall
-     * @return true if turn was successful
+     * NEW: Play flexible turn - take ANY 3 cards from anywhere!
+     * @param currentPlayer The player making the move
+     * @param selectedCards The 3 cards (from anywhere)
+     * @param sources Array of sources: "hand", "other_player", "hall"
+     * @param playerNames Array of player names (for other_player sources)
+     * @return true if valid trio
      */
-    public boolean playTurnWithPlayer(Student student, Student otherPlayer, List<Card> selectedCards) {
+    public boolean playFlexibleTurn(Student currentPlayer, List<Card> selectedCards,
+                                    String[] sources, String[] playerNames) {
         if (selectedCards == null || selectedCards.size() != 3) {
             return false;
         }
 
-        if (otherPlayer == null || otherPlayer.equals(student)) {
-            System.out.println("ERROR: Invalid other player selection!");
-            return false;
-        }
+        // Track which players need refilling
+        List<Student> playersToRefill = new ArrayList<>();
+        playersToRefill.add(currentPlayer);
 
-        Card cardFromHand = selectedCards.get(0);
-        Card cardFromOtherPlayer = selectedCards.get(1);
-        Card cardFromHall = selectedCards.get(2);
+        // Validate each card is from its claimed source
+        for (int i = 0; i < 3; i++) {
+            Card card = selectedCards.get(i);
+            String source = sources[i];
 
-        // CRITICAL VALIDATION: Verify cards are from correct sources
-        if (!student.getHand().contains(cardFromHand)) {
-            System.out.println("ERROR: Card " + cardFromHand.getCourseCode() + " not in player's hand!");
-            return false;
-        }
-
-        if (!otherPlayer.getHand().contains(cardFromOtherPlayer)) {
-            System.out.println("ERROR: Card " + cardFromOtherPlayer.getCourseCode() + " not in " + otherPlayer.getName() + "'s hand!");
-            return false;
-        }
-
-        if (!lectureHall.contains(cardFromHall)) {
-            System.out.println("ERROR: Card " + cardFromHall.getCourseCode() + " not in lecture hall!");
-            return false;
+            if (source.equals("hand")) {
+                if (!currentPlayer.getHand().contains(card)) {
+                    System.out.println("ERROR: Card not in player's hand!");
+                    return false;
+                }
+            } else if (source.equals("other_player")) {
+                Student otherPlayer = findStudentByName(playerNames[i]);
+                if (otherPlayer == null || !otherPlayer.getHand().contains(card)) {
+                    System.out.println("ERROR: Card not in other player's hand!");
+                    return false;
+                }
+                if (!playersToRefill.contains(otherPlayer)) {
+                    playersToRefill.add(otherPlayer);
+                }
+            } else if (source.equals("hall")) {
+                if (!lectureHall.contains(card)) {
+                    System.out.println("ERROR: Card not in lecture hall!");
+                    return false;
+                }
+            }
         }
 
         // Validate trio
-        Trio trio = new Trio(cardFromHand, cardFromOtherPlayer, cardFromHall);
+        Trio trio = new Trio(selectedCards.get(0), selectedCards.get(1), selectedCards.get(2));
         boolean isValid = validateTrio(trio);
 
         if (isValid) {
-            // Calculate ECTS
             int ects = trio.calculateEcts(gameMode);
 
-            // Award ECTS to student
-            student.addEcts(ects);
-            student.addCompletedTrio(trio);
+            currentPlayer.addEcts(ects);
+            currentPlayer.addCompletedTrio(trio);
 
-            // Update scoreboard
-            scoreBoard.updateScore(student, ects);
-            scoreBoard.recordTrio(student, trio);
+            scoreBoard.updateScore(currentPlayer, ects);
+            scoreBoard.recordTrio(currentPlayer, trio);
 
-            // Update team if in team mode
-            if (gameMode.isTeamMode() && student.getTeam() != null) {
-                Team team = student.getTeam();
+            if (gameMode.isTeamMode() && currentPlayer.getTeam() != null) {
+                Team team = currentPlayer.getTeam();
                 team.addCompletedTrio(trio);
                 scoreBoard.updateTeamScore(team, ects);
                 scoreBoard.recordTeamTrio(team, trio);
             }
 
-            // Remove cards: 1 from student's hand, 1 from other player's hand, 1 from lecture hall
-            student.getHand().removeCard(cardFromHand);
-            otherPlayer.getHand().removeCard(cardFromOtherPlayer);
-            lectureHall.removeCard(cardFromHall);
+            // Remove cards from their sources
+            for (int i = 0; i < 3; i++) {
+                Card card = selectedCards.get(i);
+                String source = sources[i];
 
-            // Refill both player's and other player's hands
-            refillPlayerHand(student);
-            refillPlayerHand(otherPlayer);
+                if (source.equals("hand")) {
+                    currentPlayer.getHand().removeCard(card);
+                } else if (source.equals("other_player")) {
+                    Student otherPlayer = findStudentByName(playerNames[i]);
+                    if (otherPlayer != null) {
+                        otherPlayer.getHand().removeCard(card);
+                    }
+                } else if (source.equals("hall")) {
+                    lectureHall.removeCard(card);
+                }
+            }
+
+            // Refill all affected players
+            for (Student player : playersToRefill) {
+                refillPlayerHand(player);
+            }
 
             // Refill lecture hall
             refillLectureHall();
 
-            // Give bonus turn if successful (don't advance turn)
-            return true;
+            return true; // Bonus turn!
         }
 
-        // Invalid trio - turn passes to next player
+        // Invalid trio
         turnManager.nextTurn();
         return false;
     }
 
     /**
-     * Play a turn - LEGACY METHOD (for backward compatibility)
-     * Assumes "other player" is the next neighbor
+     * Find student by name
+     */
+    private Student findStudentByName(String name) {
+        if (name == null) return null;
+        for (Student student : students) {
+            if (student.getName().equals(name)) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * LEGACY: Play turn with specific player (backward compatibility)
+     */
+    public boolean playTurnWithPlayer(Student student, Student otherPlayer, List<Card> selectedCards) {
+        String[] sources = {"hand", "other_player", "hall"};
+        String[] playerNames = {null, otherPlayer.getName(), null};
+        return playFlexibleTurn(student, selectedCards, sources, playerNames);
+    }
+
+    /**
+     * LEGACY: Play turn with neighbor (backward compatibility)
      */
     public boolean playTurn(Student student, List<Card> selectedCards) {
         Student neighbor = getNeighbor(student);
         return playTurnWithPlayer(student, neighbor, selectedCards);
     }
 
-    /**
-     * Validate if a trio meets the current game mode requirements
-     * @param trio The trio to validate
-     * @return true if valid
-     */
     public boolean validateTrio(Trio trio) {
         return trio.isValidForMode(gameMode);
     }
 
-    /**
-     * Refill lecture hall to correct size based on player count
-     */
     private void refillLectureHall() {
         int targetSize;
-
         switch (numberOfPlayers) {
             case 3:
                 targetSize = 9;
@@ -291,13 +293,8 @@ public class Game {
         }
     }
 
-    /**
-     * Refill player's hand to correct size based on player count
-     * @param student The student whose hand to refill
-     */
     private void refillPlayerHand(Student student) {
         int targetSize;
-
         switch (numberOfPlayers) {
             case 3:
                 targetSize = 9;
@@ -326,10 +323,6 @@ public class Game {
         }
     }
 
-    /**
-     * Check if any student or team has won
-     * @return The winning student, or null if no winner yet
-     */
     public Student checkVictoryConditions() {
         if (!gameMode.isTeamMode()) {
             for (Student student : students) {
@@ -347,9 +340,6 @@ public class Game {
         return null;
     }
 
-    /**
-     * End the game and display results
-     */
     public void endGame() {
         System.out.println("\n=== GAME OVER ===");
         System.out.println(scoreBoard.toString());
@@ -370,7 +360,6 @@ public class Game {
     }
 
     // Getters
-
     public List<Student> getStudents() {
         return new ArrayList<>(students);
     }
