@@ -1,5 +1,6 @@
 package model;
 
+import enums.Branch;
 import enums.Difficulty;
 import enums.GameMode;
 import java.util.ArrayList;
@@ -83,12 +84,15 @@ public class Game {
 
     /**
      * Initialize the game - create deck, shuffle, and deal cards
+     * TEAM MODE: All cards distributed to players, NO lecture hall
+     * INDIVIDUAL MODE: Cards to players + lecture hall
      */
     public void initialize() {
         deck = new Deck(difficulty);
         System.out.println("=== INITIALIZE DEBUG ===");
         System.out.println("Deck created with difficulty: " + difficulty);
         System.out.println("Initial deck size: " + deck.getRemainingCount());
+        System.out.println("Game mode: " + (gameMode.isTeamMode() ? "TEAM" : "INDIVIDUAL"));
 
         deck.shuffle();
         System.out.println("After shuffle: " + deck.getRemainingCount());
@@ -96,32 +100,43 @@ public class Game {
         int cardsPerPlayer;
         int lectureHallSize;
 
-        switch (numberOfPlayers) {
-            case 3:
-            case 2:
-                cardsPerPlayer = 9;
-                lectureHallSize = 9;
-                break;
-            case 4:
-                cardsPerPlayer = 7;
-                lectureHallSize = 8;
-                break;
-            case 5:
-                cardsPerPlayer = 6;
-                lectureHallSize = 6;
-                break;
-            case 6:
-                cardsPerPlayer = 5;
-                lectureHallSize = 6;
-                break;
-            default:
-                cardsPerPlayer = 5;
-                lectureHallSize = 9;
+        // ✅ TEAM MODE: All 36 cards distributed to players, NO lecture hall
+        if (gameMode.isTeamMode()) {
+            // Team mode: Divide all cards among players
+            cardsPerPlayer = 36 / numberOfPlayers; // Example: 6 players = 6 cards each
+            lectureHallSize = 0; // NO LECTURE HALL in team mode!
+
+            System.out.println("TEAM MODE: All 36 cards distributed among players");
+        } else {
+            // Individual mode: Players + lecture hall
+            switch (numberOfPlayers) {
+                case 3:
+                case 2:
+                    cardsPerPlayer = 9;
+                    lectureHallSize = 9;
+                    break;
+                case 4:
+                    cardsPerPlayer = 7;
+                    lectureHallSize = 8;
+                    break;
+                case 5:
+                    cardsPerPlayer = 6;
+                    lectureHallSize = 6;
+                    break;
+                case 6:
+                    cardsPerPlayer = 5;
+                    lectureHallSize = 6;
+                    break;
+                default:
+                    cardsPerPlayer = 5;
+                    lectureHallSize = 9;
+            }
         }
 
         System.out.println("Config: " + numberOfPlayers + " players, " + cardsPerPlayer + " cards each, " + lectureHallSize + " in hall");
         System.out.println("Expected total: " + (numberOfPlayers * cardsPerPlayer + lectureHallSize));
 
+        // Deal cards to players
         for (Student student : students) {
             for (int i = 0; i < cardsPerPlayer; i++) {
                 Card card = deck.dealCard();
@@ -134,14 +149,19 @@ public class Game {
 
         System.out.println("After dealing to players, deck has: " + deck.getRemainingCount());
 
-        for (int i = 0; i < lectureHallSize; i++) {
-            Card card = deck.dealCard();
-            if (card != null) {
-                lectureHall.addCard(card);
+        // ✅ Deal to lecture hall ONLY in individual mode
+        if (!gameMode.isTeamMode()) {
+            for (int i = 0; i < lectureHallSize; i++) {
+                Card card = deck.dealCard();
+                if (card != null) {
+                    lectureHall.addCard(card);
+                }
             }
+            System.out.println("Lecture hall has: " + lectureHall.getCardCount() + " cards");
+        } else {
+            System.out.println("Lecture hall: EMPTY (team mode)");
         }
 
-        System.out.println("Lecture hall has: " + lectureHall.getCardCount() + " cards");
         System.out.println("Deck remaining: " + deck.getRemainingCount());
 
         // FINAL CHECK
@@ -172,6 +192,17 @@ public class Game {
      * @param position Position in hand/hall
      * @return Result: "revealed", "mismatch", "trio_complete", "invalid"
      */
+    /**
+     * NEW: Reveal a single card during turn
+     * ✅ FEATURE: Auto-reveals duplicates from the same player
+     *
+     * @param currentPlayer The player revealing
+     * @param card The card to reveal
+     * @param source "hand", "other_player", "hall"
+     * @param playerName For other_player source
+     * @param position Position in hand/hall
+     * @return Result: "revealed", "mismatch", "trio_complete", "invalid", "auto_reveal"
+     */
     public String revealCard(Student currentPlayer, Card card, String source, String playerName, int position) {
         // Validate the reveal is legal
         if (!validateReveal(currentPlayer, card, source, playerName, position)) {
@@ -179,7 +210,50 @@ public class Game {
         }
 
         // Add to reveal state
-        currentRevealState.addReveal(card, source, playerName, position);
+        boolean added = currentRevealState.addReveal(card, source, playerName, position);
+        if (!added) {
+            return "invalid"; // Duplicate blocked
+        }
+
+        // ✅ AUTO-REVEAL DUPLICATES: Check if the player has more of this card
+        String courseCode = card.getCourseCode();
+        System.out.println("DEBUG AUTO-REVEAL: Looking for duplicates of " + courseCode + " from " + source);
+        Student sourcePlayer;
+
+        if (source.equals("hand")) {
+            sourcePlayer = currentPlayer;
+            System.out.println("  Source player: " + sourcePlayer.getName() + " (current player)");
+        } else if (source.equals("other_player")) {
+            sourcePlayer = findStudentByName(playerName);
+            System.out.println("  Source player: " + (sourcePlayer != null ? sourcePlayer.getName() : "NULL") + " (other player: " + playerName + ")");
+        } else {
+            sourcePlayer = null;
+            System.out.println("  Source player: NULL (from lecture hall)");
+        }
+
+        // If revealing from a player's hand, check for duplicates
+        if (sourcePlayer != null && currentRevealState.getRevealCount() < 3) {
+            System.out.println("  Searching " + sourcePlayer.getName() + "'s hand for duplicates of " + courseCode + " (excluding position " + position + ")");
+
+            List<CardWithPosition> duplicates = sourcePlayer.getHand().findDuplicates(courseCode, position);
+            System.out.println("  Found " + duplicates.size() + " duplicates");
+
+            // Auto-reveal duplicates (up to 3 total)
+            for (CardWithPosition cardWithPos : duplicates) {
+                if (currentRevealState.getRevealCount() >= 3) break;
+
+                // ✅ CRITICAL FIX: Use the actual position from CardWithPosition, not indexOf()
+                // indexOf() always returns the FIRST occurrence, which is wrong for duplicates!
+                int dupPosition = cardWithPos.position;
+                Card duplicate = cardWithPos.card;
+
+                // Try to add this duplicate
+                boolean dupAdded = currentRevealState.addReveal(duplicate, source, playerName, dupPosition);
+                if (dupAdded) {
+                    System.out.println("AUTO-REVEAL: Found duplicate " + courseCode + " at position " + dupPosition);
+                }
+            }
+        }
 
         // Check for mismatch after 2+ cards
         if (currentRevealState.hasMismatch()) {
@@ -193,6 +267,11 @@ public class Game {
             } else {
                 return "mismatch"; // Shouldn't happen if mismatch caught earlier
             }
+        }
+
+        // Check if auto-reveals happened
+        if (currentRevealState.getRevealCount() > 1) {
+            return "auto_reveal"; // GUI should highlight the auto-revealed cards
         }
 
         return "revealed"; // Continue revealing
@@ -212,6 +291,12 @@ public class Game {
                 return false;
             }
         } else if (source.equals("other_player")) {
+            // ✅ CRITICAL FIX: Cannot reveal from yourself as "other_player"!
+            if (playerName != null && playerName.equals(currentPlayer.getName())) {
+                System.out.println("ERROR: Cannot reveal from yourself as other_player!");
+                return false;
+            }
+
             // Find other player
             Student otherPlayer = findStudentByName(playerName);
             if (otherPlayer == null || !otherPlayer.getHand().contains(card)) {
@@ -267,22 +352,70 @@ public class Game {
         }
 
         // Remove cards from sources
+        // ✅ CRITICAL FIX: Group by player, then remove in reverse position order
         List<Student> playersToRefill = new ArrayList<>();
         playersToRefill.add(currentPlayer);
 
+        // DEBUG: Show what we're about to remove
+        System.out.println("=== REMOVAL DEBUG ===");
+        System.out.println("Current player: " + currentPlayer.getName());
+        for (int i = 0; i < revealed.size(); i++) {
+            RevealState.RevealedCard rc = revealed.get(i);
+            System.out.println("Card " + (i+1) + ": " + rc.card.getCourseCode() +
+                    " from " + rc.source +
+                    " (player: " + rc.playerName + ", position: " + rc.position + ")");
+        }
+        System.out.println("=================");
+
+        // Group removals by player to handle position shifting
+        java.util.Map<String, List<RevealState.RevealedCard>> removalsByPlayer = new java.util.HashMap<>();
+
         for (RevealState.RevealedCard rc : revealed) {
+            String key;
             if (rc.source.equals("hand")) {
-                currentPlayer.getHand().removeCard(rc.card);
+                key = "CURRENT_PLAYER";
             } else if (rc.source.equals("other_player")) {
+                key = rc.playerName;
                 Student otherPlayer = findStudentByName(rc.playerName);
-                if (otherPlayer != null) {
-                    otherPlayer.getHand().removeCard(rc.card);
-                    if (!playersToRefill.contains(otherPlayer)) {
-                        playersToRefill.add(otherPlayer);
-                    }
+                if (otherPlayer != null && !playersToRefill.contains(otherPlayer)) {
+                    playersToRefill.add(otherPlayer);
                 }
-            } else if (rc.source.equals("hall")) {
-                lectureHall.removeCard(rc.card);
+            } else {
+                key = "LECTURE_HALL";
+            }
+
+            removalsByPlayer.computeIfAbsent(key, k -> new ArrayList<>()).add(rc);
+        }
+
+        // For each player, remove cards in DESCENDING position order (highest first)
+        for (java.util.Map.Entry<String, List<RevealState.RevealedCard>> entry : removalsByPlayer.entrySet()) {
+            String playerKey = entry.getKey();
+            List<RevealState.RevealedCard> removals = entry.getValue();
+
+            // Sort by position DESCENDING (remove highest index first)
+            removals.sort((a, b) -> Integer.compare(b.position, a.position));
+
+            for (RevealState.RevealedCard rc : removals) {
+                System.out.println("DEBUG: Removing card " + rc.card.getCourseCode() +
+                        " from " + rc.source +
+                        " (player: " + rc.playerName + ")" +
+                        " at position " + rc.position);
+
+                if (rc.source.equals("hand")) {
+                    Card removed = currentPlayer.getHand().removeCard(rc.position);
+                    System.out.println("  Removed from current player: " + (removed != null ? removed.getCourseCode() : "FAILED!"));
+                } else if (rc.source.equals("other_player")) {
+                    Student otherPlayer = findStudentByName(rc.playerName);
+                    if (otherPlayer != null) {
+                        Card removed = otherPlayer.getHand().removeCard(rc.position);
+                        System.out.println("  Removed from " + rc.playerName + ": " + (removed != null ? removed.getCourseCode() : "FAILED!"));
+                    } else {
+                        System.out.println("  ERROR: Player " + rc.playerName + " not found!");
+                    }
+                } else if (rc.source.equals("hall")) {
+                    Card removed = lectureHall.removeCard(rc.position);
+                    System.out.println("  Removed from hall: " + (removed != null ? removed.getCourseCode() : "FAILED!"));
+                }
             }
         }
 
@@ -465,6 +598,11 @@ public class Game {
     }
 
     private void refillLectureHall() {
+        // ✅ TEAM MODE: No lecture hall, skip refill
+        if (gameMode.isTeamMode()) {
+            return; // No lecture hall in team mode
+        }
+
         int targetSize;
         switch (numberOfPlayers) {
             case 3:
@@ -492,22 +630,29 @@ public class Game {
 
     private void refillPlayerHand(Student student) {
         int targetSize;
-        switch (numberOfPlayers) {
-            case 3:
-            case 2:
-                targetSize = 9;
-                break;
-            case 4:
-                targetSize = 7;
-                break;
-            case 5:
-                targetSize = 6;
-                break;
-            case 6:
-                targetSize = 5;
-                break;
-            default:
-                targetSize = 5;
+
+        // ✅ TEAM MODE: All cards distributed among players (36 / numPlayers)
+        if (gameMode.isTeamMode()) {
+            targetSize = 36 / numberOfPlayers; // Example: 6 players = 6 cards each
+        } else {
+            // Individual mode: Standard distribution
+            switch (numberOfPlayers) {
+                case 3:
+                case 2:
+                    targetSize = 9;
+                    break;
+                case 4:
+                    targetSize = 7;
+                    break;
+                case 5:
+                    targetSize = 6;
+                    break;
+                case 6:
+                    targetSize = 5;
+                    break;
+                default:
+                    targetSize = 5;
+            }
         }
 
         while (student.getHand().getSize() < targetSize && !deck.isEmpty()) {
@@ -522,9 +667,13 @@ public class Game {
      * Check victory conditions
      * Simple mode: 3 trios OR trio of 7 (PFE)
      * Advanced mode (Picante): 2 linked trios OR trio of 7 (PFE)
+     *
+     * INDIVIDUAL MODE: Check each student
+     * TEAM MODE: Check team totals (all members' trios combined)
      */
     public Student checkVictoryConditions() {
         if (!gameMode.isTeamMode()) {
+            // INDIVIDUAL MODE: Check each student individually
             for (Student student : students) {
                 // Check based on difficulty
                 if (difficulty == Difficulty.SIMPLE) {
@@ -545,10 +694,66 @@ public class Game {
                 }
             }
         } else {
-            // Team mode - check team victories
+            // TEAM MODE: Check team victories (combine both members' trios)
+            System.out.println("=== CHECKING TEAM VICTORY ===");
             for (Team team : teams) {
-                if (team.hasGraduated()) {
-                    return team.getMembers().get(0);
+                System.out.println("Checking team: " + team.getTeamName());
+                List<Student> members = team.getMembers();
+
+                // Debug: Show each member's trios
+                for (Student member : members) {
+                    System.out.println("  " + member.getName() + " has " + member.getTrioCount() + " trios");
+                }
+
+                // Combine all trios from both team members
+                List<Trio> allTeamTrios = new ArrayList<>();
+                for (Student member : members) {
+                    allTeamTrios.addAll(member.getCompletedTrios());
+                }
+
+                System.out.println("  Total team trios: " + allTeamTrios.size());
+
+                // Check for PFE trio (instant win)
+                for (Trio trio : allTeamTrios) {
+                    if (trio.isPFETrio()) {
+                        System.out.println("TEAM WIN: PFE Trio!");
+                        return members.get(0); // Return first member as winner
+                    }
+                }
+
+                if (difficulty == Difficulty.SIMPLE) {
+                    // Simple: 3 trios total (combined from both members)
+                    if (allTeamTrios.size() >= 3) {
+                        System.out.println("TEAM WIN: 3+ trios (" + allTeamTrios.size() + " trios)");
+                        return members.get(0);
+                    }
+                } else if (difficulty == Difficulty.ADVANCED) {
+                    // Advanced: 2 linked trios (same branch, combined from both members)
+                    int csCount = 0, ieCount = 0, meCount = 0, eeCount = 0;
+
+                    for (Trio trio : allTeamTrios) {
+                        Branch branch = trio.getBranch();
+                        if (branch == Branch.SPECIAL) continue; // Skip PFE
+
+                        if (branch == Branch.COMPUTER_SCIENCE) csCount++;
+                        else if (branch == Branch.INDUSTRIAL_ENGINEERING) ieCount++;
+                        else if (branch == Branch.MECHANICAL_ENGINEERING) meCount++;
+                        else if (branch == Branch.ENERGY_ENGINEERING) eeCount++;
+                    }
+
+                    if (csCount >= 2 || ieCount >= 2 || meCount >= 2 || eeCount >= 2) {
+                        System.out.println("TEAM WIN: 2+ linked trios (CS=" + csCount + ", IE=" + ieCount + ", ME=" + meCount + ", EE=" + eeCount + ")");
+                        return members.get(0);
+                    }
+                }
+
+                // Also check ECTS graduation (6+)
+                if (difficulty == Difficulty.SIMPLE) {
+                    // Also check ECTS graduation (6+)
+                    if (team.hasGraduated()) {
+                        System.out.println("TEAM WIN: 6+ ECTS");
+                        return members.get(0);
+                    }
                 }
             }
         }

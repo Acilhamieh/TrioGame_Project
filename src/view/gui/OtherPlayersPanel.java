@@ -142,13 +142,11 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
      */
     public void markCardRevealed(String playerName, Card card, int position) {
         List<CardComponent> cardComps = playerCardComponents.get(playerName);
-        if (cardComps != null) {
-            for (CardComponent cardComp : cardComps) {
-                if (cardComp.getCard().equals(card) && cardComp.getPositionIndex() == position) {
-                    cardComp.setRevealed(true);
-                    break;
-                }
-            }
+        if (cardComps != null && position >= 0 && position < cardComps.size()) {
+            // ✅ FIX: Use position directly, don't compare cards!
+            // Position is unique and reliable, card.equals() is not (duplicates!)
+            CardComponent cardComp = cardComps.get(position);
+            cardComp.setRevealed(true);
         }
     }
 

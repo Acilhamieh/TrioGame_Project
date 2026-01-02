@@ -8,7 +8,7 @@ import java.util.List;
  * In the revealing game mode, players reveal cards one by one.
  *
  * @author Dana SLEIMAN, Acil HAMIEH
- * @version 1.0 - Revealing system
+ * @version 2.0 - Added duplicate prevention
  */
 public class RevealState {
     private List<RevealedCard> revealedCards;
@@ -40,16 +40,45 @@ public class RevealState {
 
     /**
      * Add a revealed card
+     * ✅ FIXED: Prevents revealing the same card (source + position) twice
+     *
      * @param card The card
      * @param source Source location
      * @param playerName Player name (if from other player)
      * @param position Position in hand/hall
-     * @return true if added successfully
+     * @return true if added successfully, false if duplicate or limit reached
      */
     public boolean addReveal(Card card, String source, String playerName, int position) {
         if (revealedCards.size() >= maxReveals) {
             return false;
         }
+
+        // ✅ CRITICAL FIX: Check for duplicate (same source + position)
+        for (RevealedCard existing : revealedCards) {
+            // Check if same source
+            if (!existing.source.equals(source)) {
+                continue;
+            }
+
+            // For hand and hall, check position only
+            if (source.equals("hand") || source.equals("hall")) {
+                if (existing.position == position) {
+                    System.out.println("WARNING: Duplicate reveal blocked - same " + source + " position " + position);
+                    return false; // Don't add duplicate!
+                }
+            }
+            // For other_player, check player name AND position
+            else if (source.equals("other_player")) {
+                if (existing.playerName != null &&
+                        existing.playerName.equals(playerName) &&
+                        existing.position == position) {
+                    System.out.println("WARNING: Duplicate reveal blocked - same card from " + playerName + " position " + position);
+                    return false; // Don't add duplicate!
+                }
+            }
+        }
+
+        // No duplicate found, add the card
         revealedCards.add(new RevealedCard(card, source, playerName, position));
         return true;
     }

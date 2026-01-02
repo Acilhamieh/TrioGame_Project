@@ -10,7 +10,7 @@ import java.util.List;
  * Cards are kept sorted by ID (HIGHEST to LOWEST: 12 → 1).
  *
  * @author Dana SLEIMAN
- * @version 2.1 - Added revealing position support
+ * @version 2.3 - Fixed auto-reveal with CardWithPosition
  */
 public class Hand {
     private List<Card> cards;
@@ -166,6 +166,34 @@ public class Hand {
      */
     public List<Integer> getRevealablePositions() {
         return HandPositionHelper.getRevealablePositions(this);
+    }
+
+    /**
+     * ✅ ULTIMATE FIX: Find all duplicate cards with the same course code
+     * Used for auto-revealing duplicates
+     * Returns CardWithPosition to avoid indexOf() issues with duplicate cards
+     *
+     * @param courseCode The course code to find duplicates of
+     * @param excludePosition Position to exclude (the card already revealed)
+     * @return List of CardWithPosition objects (cards WITH their actual positions)
+     */
+    public List<CardWithPosition> findDuplicates(String courseCode, int excludePosition) {
+        List<CardWithPosition> duplicates = new ArrayList<>();
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+
+            // ✅ CRITICAL FIX: Skip the position that's already revealed
+            if (i == excludePosition) {
+                continue;
+            }
+
+            // Add other matching cards WITH their actual position
+            // This fixes the indexOf() bug where it always returns the first match
+            if (card.getCourseCode().equals(courseCode)) {
+                duplicates.add(new CardWithPosition(card, i));
+            }
+        }
+        return duplicates;
     }
 
     @Override

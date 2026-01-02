@@ -93,11 +93,10 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
      * Mark a card as revealed (highlight it)
      */
     public void markCardRevealed(Card card, int position) {
-        for (CardComponent cardComp : cardComponents) {
-            if (cardComp.getCard().equals(card) && cardComp.getPositionIndex() == position) {
-                cardComp.setRevealed(true);
-                break;
-            }
+        // ✅ FIX: Use position directly
+        if (position >= 0 && position < cardComponents.size()) {
+            CardComponent cardComp = cardComponents.get(position);
+            cardComp.setRevealed(true);
         }
     }
 
