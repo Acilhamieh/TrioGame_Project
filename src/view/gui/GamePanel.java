@@ -266,11 +266,31 @@ public class GamePanel extends JPanel {
         }
     }
 
+
+    private void disableClickedCard(String source, String playerName, int position) {
+        System.out.println("DEBUG DISABLE: Disabling card at " + source +
+                " (player: " + playerName + ", position: " + position + ")");
+        switch (source) {
+            case "hand":
+                handPanel.disableCard(position);
+                System.out.println("  Called handPanel.disableCard(" + position + ")");
+                break;
+            case "other_player":
+                otherPlayersPanel.disableCard(playerName, position);
+                System.out.println("  Called otherPlayersPanel.disableCard(" + playerName + ", " + position + ")");
+                break;
+            case "hall":
+                lectureHallPanel.disableCard(position);
+                System.out.println("  Called lectureHallPanel.disableCard(" + position + ")");
+                break;
+        }
+    }
     /**
-     * ✅ EXTRACTED: Handle normal reveal
+     *  EXTRACTED: Handle normal reveal
      */
     private void handleRevealed(Card card, String source, String playerName, int position) {
         markCardRevealed(card, source, playerName, position);
+        disableClickedCard(source, playerName, position);
         updateInstructionLabel();
     }
 
@@ -278,13 +298,14 @@ public class GamePanel extends JPanel {
      * ✅ EXTRACTED: Handle auto-reveal of duplicates
      */
     private void handleAutoReveal(Card card, String source, String playerName, int position, Student currentPlayer) {
-        // Mark original card + auto-revealed duplicates
+        // Mark original card (don't disable here, the loop will do it)
         markCardRevealed(card, source, playerName, position);
 
-        // Mark all auto-revealed cards
+        // Mark all auto-revealed cards AND disable them (including the original)
         RevealState revealState = controller.getGame().getRevealState();
         for (RevealState.RevealedCard rc : revealState.getRevealedCards()) {
             markCardRevealed(rc.card, rc.source, rc.playerName, rc.position);
+            disableClickedCard(rc.source, rc.playerName, rc.position);  // This handles ALL cards
         }
 
         // Check if trio complete after auto-reveal

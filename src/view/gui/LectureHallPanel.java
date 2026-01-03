@@ -109,13 +109,21 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
      * Mark a card as revealed (flip face up and highlight)
      */
     public void markCardRevealed(Card card, int position) {
-        // ✅ FIX: Use position directly
+        //  FIX: Use position directly
         if (position >= 0 && position < cardComponents.size()) {
             CardComponent cardComp = cardComponents.get(position);
             cardComp.setRevealed(true);
         }
     }
-
+    /**
+     *  NEW: Disable a card after it's been clicked to prevent double-clicks
+     */
+    public void disableCard(int position) {
+        if (position >= 0 && position < cardComponents.size()) {
+            CardComponent cardComp = cardComponents.get(position);
+            cardComp.setClickable(false);
+        }
+    }
     /**
      * Flip a card back face down
      */

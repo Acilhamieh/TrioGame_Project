@@ -206,6 +206,11 @@ public class Game {
     public String revealCard(Student currentPlayer, Card card, String source, String playerName, int position) {
         // Validate the reveal is legal
         if (!validateReveal(currentPlayer, card, source, playerName, position)) {
+            System.out.println("DEBUG: validateReveal FAILED!");
+            System.out.println("  Card: " + card.getCourseCode());
+            System.out.println("  Source: " + source);
+            System.out.println("  PlayerName: " + playerName);
+            System.out.println("  Position: " + position);
             return "invalid";
         }
 

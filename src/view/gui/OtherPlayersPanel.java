@@ -13,7 +13,7 @@ import java.util.Map;
  * REVEALING MODE: All cards face-down [?], only first/last clickable
  *
  * @author Dana SLEIMAN, Acil HAMIEH
- * @version 3.0 - Revealing system
+ * @version 3.1 - Fixed position sync bug + double-click prevention
  */
 public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
@@ -46,6 +46,9 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
      * All cards face-down, only first/last clickable
      */
     public void updateDisplay(List<Student> allPlayers, Student currentPlayer) {
+        // ✅ DEBUG: Track position updates
+        System.out.println("DEBUG OtherPlayersPanel: updateDisplay() called");
+
         removeAll();
         playerCardComponents.clear();
         playerHandPanels.clear();
@@ -61,6 +64,17 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
 
         revalidate();
         repaint();
+
+        // ✅ DEBUG: Verify positions are correct
+        System.out.println("DEBUG OtherPlayersPanel: Card components created:");
+        for (Map.Entry<String, List<CardComponent>> entry : playerCardComponents.entrySet()) {
+            System.out.println("  Player " + entry.getKey() + " has " + entry.getValue().size() + " cards");
+            for (int i = 0; i < entry.getValue().size(); i++) {
+                CardComponent cc = entry.getValue().get(i);
+                System.out.println("    Position " + i + ": " + cc.getCard().getCourseCode() +
+                        " (stored position: " + cc.getPositionIndex() + ")");
+            }
+        }
     }
 
     /**
@@ -138,15 +152,26 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
     }
 
     /**
-     * Mark a card as revealed (flip face up and highlight)
+     *  FIXED: Mark a card as revealed using position directly
      */
     public void markCardRevealed(String playerName, Card card, int position) {
         List<CardComponent> cardComps = playerCardComponents.get(playerName);
         if (cardComps != null && position >= 0 && position < cardComps.size()) {
-            // ✅ FIX: Use position directly, don't compare cards!
+            //  FIX: Use position directly, don't compare cards!
             // Position is unique and reliable, card.equals() is not (duplicates!)
             CardComponent cardComp = cardComps.get(position);
             cardComp.setRevealed(true);
+        }
+    }
+
+    /**
+     *  NEW: Disable a card after it's been clicked to prevent double-clicks
+     */
+    public void disableCard(String playerName, int position) {
+        List<CardComponent> cardComps = playerCardComponents.get(playerName);
+        if (cardComps != null && position >= 0 && position < cardComps.size()) {
+            CardComponent cardComp = cardComps.get(position);
+            cardComp.setClickable(false);
         }
     }
 
