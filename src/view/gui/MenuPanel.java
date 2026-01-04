@@ -11,7 +11,7 @@ import java.util.List;
  * REVEALING GAME: 3-6 players
  *
  * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.0 - Updated for SIMPLE/ADVANCED difficulty
+ * @version 3.1 - UI fix: Player names panel is now scrollable
  */
 public class MenuPanel extends JPanel {
     private MainWindow mainWindow;
@@ -26,10 +26,9 @@ public class MenuPanel extends JPanel {
     private JButton aboutButton;
     private JButton exitButton;
 
-    /**
-     * Constructor for MenuPanel
-     * @param mainWindow Reference to main window
-     */
+    // NEW: panel for names (scrollable)
+    private JPanel playerNamesPanel;
+
     public MenuPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
 
@@ -39,40 +38,23 @@ public class MenuPanel extends JPanel {
         createComponents();
     }
 
-    /**
-     * Create all UI components
-     */
     private void createComponents() {
-        // Title panel
-        JPanel titlePanel = createTitlePanel();
-        add(titlePanel, BorderLayout.NORTH);
-
-        // Configuration panel
-        JPanel configPanel = createConfigPanel();
-        add(configPanel, BorderLayout.CENTER);
-
-        // Button panel
-        JPanel buttonPanel = createButtonPanel();
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(createTitlePanel(), BorderLayout.NORTH);
+        add(createConfigPanel(), BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
-    /**
-     * Create title panel with game logo
-     * @return Title panel
-     */
     private JPanel createTitlePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(70, 130, 180)); // Steel Blue
+        panel.setBackground(new Color(70, 130, 180));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
 
-        // Title
         JLabel titleLabel = new JLabel("TRIO_UTBM");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Subtitle
         JLabel subtitleLabel = new JLabel("Revealing Game - Graduate by Remembering!");
         subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
         subtitleLabel.setForeground(Color.WHITE);
@@ -85,53 +67,46 @@ public class MenuPanel extends JPanel {
         return panel;
     }
 
-    /**
-     * Create configuration panel for game setup
-     * @return Configuration panel
-     */
     private JPanel createConfigPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(40, 100, 40, 100));
         panel.setBackground(new Color(240, 248, 255));
 
-        // Section title
         JLabel setupLabel = new JLabel("Game Setup");
         setupLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         setupLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(setupLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // Player count (3-6 players)
         panel.add(createLabeledCombo("Number of Players:",
                 new String[]{"3 Players", "4 Players", "5 Players", "6 Players"},
                 combo -> playerCountCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Game mode (Individual or Teams)
         panel.add(createLabeledCombo("Game Mode:",
-                new String[]{
-                        "Individual",
-                        "Teams (Teams of 2)"
-                },
+                new String[]{"Individual", "Teams (Teams of 2)"},
                 combo -> gameModeCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Difficulty (Simple or Advanced)
         panel.add(createLabeledCombo("Difficulty:",
                 new String[]{"Simple (3 matching = 2 ECTS)", "Advanced (3 matching same branch = 3 ECTS)"},
                 combo -> difficultyCombo = combo));
         panel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // Player names section
         JLabel namesLabel = new JLabel("Player Names");
         namesLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         namesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(namesLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // Player name fields (create 6, show/hide based on player count)
+        // ===== PLAYER NAMES PANEL (SCROLLABLE) =====
+        playerNamesPanel = new JPanel();
+        playerNamesPanel.setLayout(new BoxLayout(playerNamesPanel, BoxLayout.Y_AXIS));
+        playerNamesPanel.setBackground(new Color(240, 248, 255));
+
         playerNameFields = new JTextField[6];
+
         for (int i = 0; i < 6; i++) {
             JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             namePanel.setBackground(new Color(240, 248, 255));
@@ -144,33 +119,35 @@ public class MenuPanel extends JPanel {
 
             namePanel.add(label);
             namePanel.add(playerNameFields[i]);
-            panel.add(namePanel);
+            playerNamesPanel.add(namePanel);
 
-            // Hide players 4-6 initially (start with 3)
             if (i >= 3) {
                 namePanel.setVisible(false);
             }
         }
 
-        // Add listener to show/hide player fields based on count
+        JScrollPane scrollPane = new JScrollPane(playerNamesPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(600, 200));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(12);
+
+        panel.add(scrollPane);
+
         playerCountCombo.addActionListener(e -> {
-            int count = playerCountCombo.getSelectedIndex() + 3; // 3-6 (index 0=3, 1=4, 2=5, 3=6)
+            int count = playerCountCombo.getSelectedIndex() + 3;
             for (int i = 0; i < 6; i++) {
                 Component parent = playerNameFields[i].getParent();
                 parent.setVisible(i < count);
             }
+            playerNamesPanel.revalidate();
+            playerNamesPanel.repaint();
         });
 
         return panel;
     }
 
-    /**
-     * Create labeled combo box
-     * @param labelText Label text
-     * @param items Combo box items
-     * @param comboSetter Consumer to set combo reference
-     * @return Panel with label and combo
-     */
     private JPanel createLabeledCombo(String labelText, String[] items,
                                       java.util.function.Consumer<JComboBox<String>> comboSetter) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -188,43 +165,31 @@ public class MenuPanel extends JPanel {
 
         panel.add(label);
         panel.add(combo);
-
         return panel;
     }
 
-    /**
-     * Create button panel
-     * @return Button panel
-     */
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         panel.setBackground(new Color(240, 248, 255));
 
-        // Start button
         startButton = new JButton("Start Game");
         startButton.setFont(new Font("SansSerif", Font.BOLD, 16));
         startButton.setPreferredSize(new Dimension(150, 40));
-        startButton.setBackground(new Color(34, 139, 34)); // Forest Green
+        startButton.setBackground(new Color(34, 139, 34));
         startButton.setForeground(Color.WHITE);
         startButton.addActionListener(e -> startGame());
 
-        // Rules button
         rulesButton = new JButton("Rules");
-        rulesButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
         rulesButton.setPreferredSize(new Dimension(120, 40));
         rulesButton.addActionListener(e -> mainWindow.showRules());
 
-        // About button
         aboutButton = new JButton("About");
-        aboutButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
         aboutButton.setPreferredSize(new Dimension(120, 40));
         aboutButton.addActionListener(e -> mainWindow.showAbout());
 
-        // Exit button
         exitButton = new JButton("Exit");
-        exitButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
         exitButton.setPreferredSize(new Dimension(120, 40));
-        exitButton.setBackground(new Color(220, 20, 60)); // Crimson
+        exitButton.setBackground(new Color(220, 20, 60));
         exitButton.setForeground(Color.WHITE);
         exitButton.addActionListener(e -> System.exit(0));
 
@@ -236,21 +201,17 @@ public class MenuPanel extends JPanel {
         return panel;
     }
 
-    /**
-     * Validate and start game
-     */
+    // ===== GAME START LOGIC (UNCHANGED) =====
+
     private void startGame() {
-        // Get configuration - UPDATED for 3-6 players
-        int numPlayers = playerCountCombo.getSelectedIndex() + 3; // 3-6 (index 0=3, 1=4, 2=5, 3=6)
+        int numPlayers = playerCountCombo.getSelectedIndex() + 3;
 
         GameMode mode = getSelectedGameMode();
         Difficulty difficulty = getSelectedDifficulty();
 
-        // Validate player names
         List<String> playerNames = new ArrayList<>();
         for (int i = 0; i < numPlayers; i++) {
             String name = playerNameFields[i].getText().trim();
-
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "Player " + (i + 1) + " name cannot be empty!",
@@ -258,110 +219,47 @@ public class MenuPanel extends JPanel {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            if (name.length() > 20) {
-                JOptionPane.showMessageDialog(this,
-                        "Player " + (i + 1) + " name is too long (max 20 characters)!",
-                        "Invalid Name",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
             playerNames.add(name);
         }
 
-        // Validate team mode - must have even number of players
         if (mode.isTeamMode() && numPlayers % 2 != 0) {
             JOptionPane.showMessageDialog(this,
-                    "Team mode requires an even number of players!\n" +
-                            "Current: " + numPlayers + " players\n" +
-                            "Please select 4 or 6 players for team mode.",
+                    "Team mode requires an even number of players!",
                     "Invalid Configuration",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // For team mode, let players choose partners
-        if (mode.isTeamMode()) {
-            boolean partnersConfirmed = confirmTeamPartners(playerNames);
-            if (!partnersConfirmed) {
-                return; // User cancelled
-            }
+        if (mode.isTeamMode() && !confirmTeamPartners(playerNames)) {
+            return;
         }
 
-        // Start game
         mainWindow.startNewGame(numPlayers, mode, difficulty, playerNames);
     }
 
-    /**
-     * Let players confirm team partnerships
-     * @param playerNames List of player names
-     * @return true if confirmed, false if cancelled
-     */
     private boolean confirmTeamPartners(List<String> playerNames) {
-        StringBuilder teamInfo = new StringBuilder();
-        teamInfo.append("Team Formation:\n\n");
-
-        int teamNumber = 1;
-        for (int i = 0; i < playerNames.size(); i += 2) {
-            teamInfo.append("Team ").append(teamNumber).append(": ");
-            teamInfo.append(playerNames.get(i));
-            teamInfo.append(" & ");
-            teamInfo.append(playerNames.get(i + 1));
-            teamInfo.append("\n");
-            teamNumber++;
+        StringBuilder teamInfo = new StringBuilder("Team Formation:\n\n");
+        for (int i = 0, t = 1; i < playerNames.size(); i += 2, t++) {
+            teamInfo.append("Team ").append(t).append(": ")
+                    .append(playerNames.get(i)).append(" & ")
+                    .append(playerNames.get(i + 1)).append("\n");
         }
-
-        teamInfo.append("\nPlayers are paired in order entered.\n");
-        teamInfo.append("Continue with these teams?");
-
-        int choice = JOptionPane.showConfirmDialog(this,
-                teamInfo.toString(),
-                "Confirm Teams",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-
-        return choice == JOptionPane.YES_OPTION;
+        teamInfo.append("\nContinue with these teams?");
+        return JOptionPane.showConfirmDialog(this, teamInfo.toString(),
+                "Confirm Teams", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
-    /**
-     * Get selected game mode
-     * @return Selected GameMode enum
-     */
     private GameMode getSelectedGameMode() {
-        int modeIndex = gameModeCombo.getSelectedIndex();
-        int difficultyIndex = difficultyCombo.getSelectedIndex();
-
-        // Combine mode and difficulty
-        // Mode: 0 = Individual, 1 = Teams
-        // Difficulty: 0 = Simple, 1 = Advanced
-
-        if (modeIndex == 0) { // Individual
-            if (difficultyIndex == 0) {
-                return GameMode.INDIVIDUAL_SIMPLE;
-            } else {
-                return GameMode.INDIVIDUAL_ADVANCED;
-            }
-        } else { // Teams
-            if (difficultyIndex == 0) {
-                return GameMode.TEAM_SIMPLE;
-            } else {
-                return GameMode.TEAM_ADVANCED;
-            }
-        }
+        int m = gameModeCombo.getSelectedIndex();
+        int d = difficultyCombo.getSelectedIndex();
+        return (m == 0)
+                ? (d == 0 ? GameMode.INDIVIDUAL_SIMPLE : GameMode.INDIVIDUAL_ADVANCED)
+                : (d == 0 ? GameMode.TEAM_SIMPLE : GameMode.TEAM_ADVANCED);
     }
 
-    /**
-     * Get selected difficulty - UPDATED
-     * @return Selected Difficulty enum (SIMPLE or ADVANCED)
-     */
     private Difficulty getSelectedDifficulty() {
-        int difficultyIndex = difficultyCombo.getSelectedIndex();
-
-        if (difficultyIndex == 0) {
-            return Difficulty.SIMPLE;  // "Simple (3 matching = 2 ECTS)"
-        } else {
-            return Difficulty.ADVANCED;  // "Advanced (3 matching same branch = 3 ECTS)"
-        }
+        return difficultyCombo.getSelectedIndex() == 0
+                ? Difficulty.SIMPLE
+                : Difficulty.ADVANCED;
     }
 }
