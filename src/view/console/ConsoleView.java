@@ -1,286 +1,211 @@
 package view.console;
 
-import controller.*;
-import enums.*;
+import controller.GameController;
+import enums.Difficulty;
+import enums.GameMode;
+import model.Card;
+import model.Hand;
+import model.LectureHall;
+import model.Student;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-/**
- * Main console view - coordinates the console-based user interface.
- * Entry point for console mode gameplay.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
 public class ConsoleView {
-    private GameController gameController;
-    private MenuView menuView;
-    private GameView gameView;
-    private InputReader inputReader;
 
-    /**
-     * Constructor for ConsoleView
-     */
-    public ConsoleView() {
-        this.gameController = new GameController();
-        this.menuView = new MenuView();
-        this.gameView = new GameView();
-        this.inputReader = new InputReader();
-    }
+    private final Scanner scanner = new Scanner(System.in);
+    private final GameController controller = new GameController();
 
-    /**
-     * Start the console interface
-     */
     public void start() {
-        displayWelcomeBanner();
+        while (true) {
+            System.out.println("==================================");
+            System.out.println("           TRIO_UTBM");
+            System.out.println("==================================");
+            System.out.println("1. New Game");
+            System.out.println("2. Rules");
+            System.out.println("3. Exit");
+            System.out.print("Choice: ");
 
-        boolean running = true;
-
-        while (running) {
-            int choice = menuView.showMainMenu();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
-                case 1:
+                case "1":
                     startNewGame();
                     break;
-                case 2:
+                case "2":
                     showRules();
                     break;
-                case 3:
-                    showAbout();
-                    break;
-                case 4:
-                    running = false;
-                    System.out.println("\n👋 Thanks for playing Trio_UTBM!");
-                    System.out.println("See you next time!\n");
-                    break;
+                case "3":
+                    System.out.println("Goodbye.");
+                    return;
                 default:
-                    System.out.println("❌ Invalid choice!");
+                    System.out.println("Invalid choice.");
             }
         }
-
-        inputReader.close();
     }
 
-    /**
-     * Display welcome banner
-     */
-    private void displayWelcomeBanner() {
-        System.out.println("\n╔════════════════════════════════════════════════════╗");
-        System.out.println("║                                                    ║");
-        System.out.println("║              🎓 TRIO_UTBM 🎓                      ║");
-        System.out.println("║                                                    ║");
-        System.out.println("║         Graduate by Forming Course Trios!         ║");
-        System.out.println("║                                                    ║");
-        System.out.println("╚════════════════════════════════════════════════════╝");
+    private void showRules() {
+        System.out.println("\nRULES (Console Version)");
+        System.out.println("----------------------");
+        System.out.println("This console version is a simplified mode.");
+        System.out.println("On your turn:");
+        System.out.println("- Select 2 cards from your hand");
+        System.out.println("- Select 1 card from the lecture hall");
+        System.out.println("- If the 3 cards match, you win a trio");
+        System.out.println("- Otherwise, the turn passes to the next player");
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
     }
 
-    /**
-     * Start a new game
-     */
     private void startNewGame() {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("           🎮 NEW GAME SETUP");
-        System.out.println("=".repeat(50));
+        int numPlayers = askNumberOfPlayers();
+        GameMode mode = askGameMode();
+        Difficulty difficulty = askDifficulty();
+        List<String> names = askPlayerNames(numPlayers);
 
-        // Get game configuration from user
-        int numPlayers = menuView.getPlayerCount();
-        if (numPlayers == -1) return; // User cancelled
-
-        GameMode mode = menuView.getGameMode();
-        if (mode == null) return;
-
-        // Team mode validation
-        if (mode.isTeamMode() && numPlayers % 2 != 0) {
-            System.out.println("\n❌ Team mode requires an even number of players!");
-            System.out.println("Please select 2, 4, or 6 players for team mode.\n");
-            inputReader.waitForEnter();
+        boolean ok = controller.initializeGame(numPlayers, mode, difficulty, names);
+        if (!ok) {
+            System.out.println("Game initialization failed.");
             return;
         }
 
-        Difficulty difficulty = menuView.getDifficulty();
-        if (difficulty == null) return;
-
-        List<String> playerNames = menuView.getPlayerNames(numPlayers);
-        if (playerNames == null || playerNames.isEmpty()) return;
-
-        // Initialize game
-        boolean success = gameController.initializeGame(numPlayers, mode, difficulty, playerNames);
-
-        if (success) {
-            gameController.startGame();
-            runGameLoop();
-        } else {
-            System.out.println("\n❌ Failed to initialize game!");
-            inputReader.waitForEnter();
-        }
+        controller.startGame();
+        gameLoop();
     }
 
-    /**
-     * Main game loop
-     */
-    private void runGameLoop() {
-        while (gameController.isGameRunning()) {
-            // Clear and display game state
-            inputReader.clearScreen();
-            gameView.displayGameState(gameController);
+    private void gameLoop() {
+        while (controller.isGameRunning()) {
+            Student current = controller.getCurrentPlayer();
 
-            // Get player action
-            System.out.println("\n" + "─".repeat(50));
-            System.out.println("What would you like to do?");
-            System.out.println("1. Form a Trio (select 3 cards)");
-            System.out.println("2. View Scores");
-            System.out.println("3. View Rules");
-            System.out.println("4. Quit Game");
-            System.out.print("\nChoice: ");
+            System.out.println("\n----------------------------------");
+            System.out.println("Current player: " + current.getName());
+            System.out.println("ECTS: " + current.getEctsCredits() +
+                    " | Trios: " + current.getTrioCount());
+            System.out.println("----------------------------------");
 
-            String input = inputReader.readLine();
+            displayHand(current.getHand());
 
-            switch (input.trim()) {
+            if (!controller.getGame().getGameMode().isTeamMode()) {
+                displayLectureHall(controller.getGame().getLectureHall());
+            }
+
+            System.out.println("\n1. Play turn");
+            System.out.println("2. View scores");
+            System.out.println("3. Quit game");
+            System.out.print("Choice: ");
+
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
                 case "1":
-                    executePlayerTurn();
+                    playTurn();
                     break;
                 case "2":
-                    gameView.displayDetailedScores(gameController);
-                    inputReader.waitForEnter();
+                    System.out.println(controller.getGame().getScoreBoard().toString());
+
                     break;
                 case "3":
-                    showQuickRules();
-                    inputReader.waitForEnter();
-                    break;
-                case "4":
-                    if (confirmQuit()) {
-                        gameController.endGame();
-                        return;
-                    }
-                    break;
+                    controller.endGame();
+                    return;
                 default:
-                    System.out.println("❌ Invalid choice!");
-                    inputReader.waitForEnter();
+                    System.out.println("Invalid choice.");
             }
         }
-
-        // Game ended
-        System.out.println("\nPress Enter to return to main menu...");
-        inputReader.waitForEnter();
     }
 
-    /**
-     * Execute a player's turn
-     */
-    private void executePlayerTurn() {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("           🎯 FORM A TRIO");
-        System.out.println("=".repeat(50));
-
-        System.out.println("\nSelect 3 cards:");
-        System.out.println("• 2 cards from your hand");
-        System.out.println("• 1 card from the Lecture Hall");
-        System.out.println("\nEnter card indices (e.g., 0 1 4):");
+    private void playTurn() {
+        System.out.println("Enter 3 indices: handIndex1 handIndex2 hallIndex");
         System.out.print("> ");
 
-        String input = inputReader.readLine();
-
-        if (input.trim().equalsIgnoreCase("cancel")) {
-            return;
-        }
-
-        InputHandler handler = new InputHandler();
-        int[] selection = handler.parseCardSelection(input);
-
-        if (selection != null) {
-            boolean success = gameController.executeTurn(selection);
-
-            if (success) {
-                System.out.println("\n✅ Valid trio formed! You get a bonus turn!");
-            } else {
-                System.out.println("\n❌ Invalid trio. Turn passes to next player.");
+        try {
+            String[] parts = scanner.nextLine().trim().split("\\s+");
+            if (parts.length != 3) {
+                System.out.println("You must enter exactly 3 numbers.");
+                return;
             }
 
-            inputReader.waitForEnter();
-        } else {
-            inputReader.waitForEnter();
+            int[] indices = new int[3];
+            for (int i = 0; i < 3; i++) {
+                indices[i] = Integer.parseInt(parts[i]);
+            }
+
+            controller.executeTurn(indices);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Use numbers only.");
         }
     }
 
-    /**
-     * Show game rules
-     */
-    private void showRules() {
-        System.out.println("\n╔════════════════════════════════════════════════════╗");
-        System.out.println("║                   📖 GAME RULES                    ║");
-        System.out.println("╚════════════════════════════════════════════════════╝\n");
-
-        System.out.println("🎯 OBJECTIVE:");
-        System.out.println("   Be the first to earn 6 ECTS credits by forming trios!\n");
-
-        System.out.println("🎴 WHAT IS A TRIO?");
-        System.out.println("   Three cards with the SAME course code\n");
-
-        System.out.println("📚 GAME MODES:");
-        System.out.println("   • Simple Mode: Any 3 matching cards = 2 ECTS");
-        System.out.println("   • Advanced Mode: 3 matching cards from same branch = 3 ECTS\n");
-
-        System.out.println("👥 TEAM MODE:");
-        System.out.println("   • Play in teams of 2");
-        System.out.println("   • Share ECTS credits");
-        System.out.println("   • First team to 6 ECTS wins!\n");
-
-        System.out.println("⭐ SPECIAL:");
-        System.out.println("   • PFE Trio (3 PFE cards) = 6 ECTS = Instant Win!\n");
-
-        System.out.println("🔄 HOW TO PLAY:");
-        System.out.println("   1. Select 2 cards from your hand");
-        System.out.println("   2. Select 1 card from the Lecture Hall");
-        System.out.println("   3. If valid trio → Earn ECTS + Bonus turn!");
-        System.out.println("   4. If invalid → Turn passes to next player\n");
-
-        inputReader.waitForEnter();
+    private void displayHand(Hand hand) {
+        System.out.println("\nYour hand:");
+        List<Card> cards = hand.getAllCards();
+        for (int i = 0; i < cards.size(); i++) {
+            System.out.println("[" + i + "] " + cards.get(i).getCourseCode());
+        }
     }
 
-    /**
-     * Show quick rules during game
-     */
-    private void showQuickRules() {
-        System.out.println("\n📖 Quick Rules:");
-        System.out.println("• Trio = 3 cards with same course code");
-        System.out.println("• Select 2 from hand + 1 from hall");
-        System.out.println("• Valid trio = ECTS credits + bonus turn");
-        System.out.println("• First to 6 ECTS graduates!");
+    private void displayLectureHall(LectureHall hall) {
+        System.out.println("\nLecture hall:");
+        List<Card> cards = hall.getAllCards();
+        for (int i = 0; i < cards.size(); i++) {
+            System.out.println("[" + i + "] " + cards.get(i).getCourseCode());
+        }
     }
 
-    /**
-     * Show about information
-     */
-    private void showAbout() {
-        System.out.println("\n╔════════════════════════════════════════════════════╗");
-        System.out.println("║                   ℹ️  ABOUT                        ║");
-        System.out.println("╚════════════════════════════════════════════════════╝\n");
-
-        System.out.println("🎓 TRIO_UTBM");
-        System.out.println("   A card game about graduating from UTBM!\n");
-
-        System.out.println("👨‍💻 Developed by:");
-        System.out.println("   • Dana SLEIMAN");
-        System.out.println("   • Acil HAMIEH\n");
-
-        System.out.println("📚 Course: AP4B");
-        System.out.println("🏫 UTBM - Université de Technologie");
-        System.out.println("    de Belfort-Montbéliard\n");
-
-        System.out.println("📅 Session 1: Model & UML Design");
-        System.out.println("📅 Session 2: Controllers & Console Interface");
-        System.out.println("📅 Session 3: Graphical User Interface\n");
-
-        inputReader.waitForEnter();
+    private int askNumberOfPlayers() {
+        while (true) {
+            System.out.print("Number of players (2-6): ");
+            try {
+                int n = Integer.parseInt(scanner.nextLine());
+                if (n >= 2 && n <= 6) return n;
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Invalid number.");
+        }
     }
 
-    /**
-     * Confirm quit action
-     * @return true if user confirms quit
-     */
-    private boolean confirmQuit() {
-        System.out.print("\nAre you sure you want to quit? (y/n): ");
-        String response = inputReader.readLine().trim().toLowerCase();
-        return response.equals("y") || response.equals("yes");
+    private GameMode askGameMode() {
+        while (true) {
+            System.out.println("Game mode:");
+            System.out.println("1. Individual - Simple");
+            System.out.println("2. Individual - Advanced");
+            System.out.println("3. Team - Simple");
+            System.out.println("4. Team - Advanced");
+            System.out.print("Choice: ");
+
+            String c = scanner.nextLine();
+            switch (c) {
+                case "1": return GameMode.INDIVIDUAL_SIMPLE;
+                case "2": return GameMode.INDIVIDUAL_ADVANCED;
+                case "3": return GameMode.TEAM_SIMPLE;
+                case "4": return GameMode.TEAM_ADVANCED;
+                default: System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private Difficulty askDifficulty() {
+        while (true) {
+            System.out.println("Difficulty:");
+            System.out.println("1. Simple");
+            System.out.println("2. Advanced");
+            System.out.print("Choice: ");
+
+            String c = scanner.nextLine();
+            switch (c) {
+                case "1": return Difficulty.SIMPLE;
+                case "2": return Difficulty.ADVANCED;
+                default: System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private List<String> askPlayerNames(int count) {
+        List<String> names = new ArrayList<>();
+        for (int i = 1; i <= count; i++) {
+            System.out.print("Name of player " + i + ": ");
+            names.add(scanner.nextLine().trim());
+        }
+        return names;
     }
 }

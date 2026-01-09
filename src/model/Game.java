@@ -285,44 +285,56 @@ public class Game {
     /**
      * Validate that a reveal is legal
      */
-    private boolean validateReveal(Student currentPlayer, Card card, String source, String playerName, int position) {
+    private boolean validateReveal(Student currentPlayer,
+                                   Card card,
+                                   String source,
+                                   String playerName,
+                                   int position) {
+
+        // ===== REVEAL FROM CURRENT PLAYER HAND =====
         if (source.equals("hand")) {
-            // Must be from current player's hand
+
+            // Card must belong to current player
             if (!currentPlayer.getHand().contains(card)) {
                 return false;
             }
-            // Must be revealable position (first/last + duplicates)
-            if (!currentPlayer.getHand().isPositionRevealable(position)) {
-                return false;
-            }
-        } else if (source.equals("other_player")) {
-            // ✅ CRITICAL FIX: Cannot reveal from yourself as "other_player"!
+
+            // ✅ IMPORTANT FIX:
+            // Always allow revealing from own hand.
+            // Matching / mismatch is handled AFTER reveal, not here.
+            return true;
+        }
+
+        // ===== REVEAL FROM OTHER PLAYER =====
+        else if (source.equals("other_player")) {
+
+            // Cannot reveal from yourself as other_player
             if (playerName != null && playerName.equals(currentPlayer.getName())) {
-                System.out.println("ERROR: Cannot reveal from yourself as other_player!");
                 return false;
             }
 
-            // Find other player
             Student otherPlayer = findStudentByName(playerName);
             if (otherPlayer == null || !otherPlayer.getHand().contains(card)) {
                 return false;
             }
-            // For other players, only first/last allowed (not duplicates from UI perspective)
-            List<Integer> firstLast = HandPositionHelper.getFirstLastPositions(otherPlayer.getHand());
-            if (!firstLast.contains(position)) {
-                return false;
-            }
-        } else if (source.equals("hall")) {
-            // Must be in lecture hall
-            if (!lectureHall.contains(card)) {
-                return false;
-            }
-        } else {
-            return false;
+
+            // Only first or last card can be revealed
+            List<Integer> firstLast =
+                    HandPositionHelper.getFirstLastPositions(otherPlayer.getHand());
+
+            return firstLast.contains(position);
         }
 
-        return true;
+        // ===== REVEAL FROM LECTURE HALL =====
+        else if (source.equals("hall")) {
+
+            return lectureHall.contains(card);
+        }
+
+        return false;
     }
+
+
 
     /**
      * Complete a trio after 3 cards revealed

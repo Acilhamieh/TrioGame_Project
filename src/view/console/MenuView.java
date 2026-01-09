@@ -130,11 +130,13 @@ public class MenuView {
     public Difficulty getDifficulty() {
         System.out.println("\n⚙️  Select Difficulty:");
         System.out.println();
-        System.out.println("  1. 🟢 Easy");
-        System.out.println("  2. 🟡 Normal");
-        System.out.println("  3. 🔴 Hard");
+        System.out.println("  1. ✅ Simple");
+        System.out.println("     └─ Any 3 matching cards = 2 ECTS");
         System.out.println();
-        System.out.print("Enter your choice (1-3): ");
+        System.out.println("  2. 🔥 Advanced");
+        System.out.println("     └─ 3 matching cards (same branch) = 3 ECTS");
+        System.out.println();
+        System.out.print("Enter your choice (1-2): ");
 
         String input = inputReader.readLine().trim();
 
@@ -148,16 +150,14 @@ public class MenuView {
                 case 1:
                     return Difficulty.SIMPLE;
                 case 2:
-                    return Difficulty.SIMPLE;
-                case 3:
                     return Difficulty.ADVANCED;
                 default:
                     System.out.println("❌ Invalid choice!");
-                    return getDifficulty(); // Retry
+                    return getDifficulty();
             }
         } catch (NumberFormatException e) {
             System.out.println("❌ Invalid input!");
-            return getDifficulty(); // Retry
+            return getDifficulty();
         }
     }
 

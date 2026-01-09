@@ -221,10 +221,20 @@ public class GamePanel extends JPanel {
 
     private void handleTrioComplete(Card card, String source, String playerName, int position, Student currentPlayer) {
         markCardRevealed(card, source, playerName, position);
-        controller.getGame().completeRevealedTrio(currentPlayer);
-        updateDisplay();
-        checkVictory();
+        instructionLabel.setText("TRIO!");
+
+        boolean success = controller.getGame().completeRevealedTrio(currentPlayer);
+
+        if (success) {
+            // IMPORTANT: stop here, do NOT trigger anything else
+            updateDisplay();
+            checkVictory();
+            return; // ✅ THIS LINE IS THE KEY
+        }
     }
+
+
+
 
     private void handleMismatch(Card card, String source, String playerName, int position) {
         markCardRevealed(card, source, playerName, position);
@@ -255,9 +265,15 @@ public class GamePanel extends JPanel {
     }
 
     private void clearAndEndTurn() {
-        controller.getGame().handleMismatch();
-        updateDisplay();
+        RevealState revealState = controller.getGame().getRevealState();
+
+        // Only end the turn if the player actually revealed something
+        if (revealState.getRevealCount() > 0) {
+            controller.getGame().handleMismatch();
+            updateDisplay();
+        }
     }
+
 
     private void updateInstructionLabel() {
         int count = controller.getGame().getRevealState().getRevealCount();
