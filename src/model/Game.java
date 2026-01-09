@@ -204,83 +204,74 @@ public class Game {
      * @return Result: "revealed", "mismatch", "trio_complete", "invalid", "auto_reveal"
      */
     public String revealCard(Student currentPlayer, Card card, String source, String playerName, int position) {
-        // Validate the reveal is legal
-        if (!validateReveal(currentPlayer, card, source, playerName, position)) {
-            System.out.println("DEBUG: validateReveal FAILED!");
-            System.out.println("  Card: " + card.getCourseCode());
-            System.out.println("  Source: " + source);
-            System.out.println("  PlayerName: " + playerName);
-            System.out.println("  Position: " + position);
+
+        int revealCountBefore = currentRevealState.getRevealCount();
+
+        // Limit
+        if (revealCountBefore >= 3) {
             return "invalid";
         }
 
-        // Add to reveal state
+        // Validate
+        if (!validateReveal(currentPlayer, card, source, playerName, position)) {
+            return "invalid";
+        }
+
+        // Add revealed card
         boolean added = currentRevealState.addReveal(card, source, playerName, position);
         if (!added) {
-            return "invalid"; // Duplicate blocked
+            return "invalid";
         }
 
-        // ✅ AUTO-REVEAL DUPLICATES: Check if the player has more of this card
-        String courseCode = card.getCourseCode();
-        System.out.println("DEBUG AUTO-REVEAL: Looking for duplicates of " + courseCode + " from " + source);
-        Student sourcePlayer;
+        // FIRST CARD → always OK
+        if (revealCountBefore == 0) {
+            return "revealed";
+        }
 
+        // SECOND CARD LOGIC
+        Card firstCard = currentRevealState.getRevealedCards().get(0).card;
+
+        // If second card is different → mismatch
+        if (!card.matches(firstCard)) {
+            return "mismatch";
+        }
+
+        // AUTO-REVEAL duplicates ONLY after first card
+        Student sourcePlayer = null;
         if (source.equals("hand")) {
             sourcePlayer = currentPlayer;
-            System.out.println("  Source player: " + sourcePlayer.getName() + " (current player)");
         } else if (source.equals("other_player")) {
             sourcePlayer = findStudentByName(playerName);
-            System.out.println("  Source player: " + (sourcePlayer != null ? sourcePlayer.getName() : "NULL") + " (other player: " + playerName + ")");
-        } else {
-            sourcePlayer = null;
-            System.out.println("  Source player: NULL (from lecture hall)");
         }
 
-        // If revealing from a player's hand, check for duplicates
-        if (sourcePlayer != null && currentRevealState.getRevealCount() < 3) {
-            System.out.println("  Searching " + sourcePlayer.getName() + "'s hand for duplicates of " + courseCode + " (excluding position " + position + ")");
+        if (sourcePlayer != null) {
+            List<CardWithPosition> duplicates =
+                    sourcePlayer.getHand().findDuplicates(card.getCourseCode(), position);
 
-            List<CardWithPosition> duplicates = sourcePlayer.getHand().findDuplicates(courseCode, position);
-            System.out.println("  Found " + duplicates.size() + " duplicates");
-
-            // Auto-reveal duplicates (up to 3 total)
-            for (CardWithPosition cardWithPos : duplicates) {
+            for (CardWithPosition cwp : duplicates) {
                 if (currentRevealState.getRevealCount() >= 3) break;
 
-                // ✅ CRITICAL FIX: Use the actual position from CardWithPosition, not indexOf()
-                // indexOf() always returns the FIRST occurrence, which is wrong for duplicates!
-                int dupPosition = cardWithPos.position;
-                Card duplicate = cardWithPos.card;
-
-                // Try to add this duplicate
-                boolean dupAdded = currentRevealState.addReveal(duplicate, source, playerName, dupPosition);
-                if (dupAdded) {
-                    System.out.println("AUTO-REVEAL: Found duplicate " + courseCode + " at position " + dupPosition);
-                }
+                currentRevealState.addReveal(
+                        cwp.card,
+                        source,
+                        playerName,
+                        cwp.position
+                );
             }
         }
 
-        // Check for mismatch after 2+ cards
-        if (currentRevealState.hasMismatch()) {
-            return "mismatch"; // GUI should flip cards back after 2 seconds
-        }
-
-        // Check if trio complete (3 cards revealed)
+        // TRIO CHECK
         if (currentRevealState.getRevealCount() == 3) {
-            if (currentRevealState.isValidTrio()) {
-                return "trio_complete"; // GUI should process trio
-            } else {
-                return "mismatch"; // Shouldn't happen if mismatch caught earlier
-            }
+            return currentRevealState.isValidTrio()
+                    ? "trio_complete"
+                    : "mismatch";
         }
 
-        // Check if auto-reveals happened
-        if (currentRevealState.getRevealCount() > 1) {
-            return "auto_reveal"; // GUI should highlight the auto-revealed cards
-        }
-
-        return "revealed"; // Continue revealing
+        return "auto_reveal";
     }
+
+
+
 
     /**
      * Validate that a reveal is legal

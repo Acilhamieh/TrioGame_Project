@@ -219,20 +219,32 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
 
     @Override
     public void onCardSelected(Card card, int position) {
-        // Get player name
         String playerName = null;
+
+        // Find which player's panel owns this position
         for (Map.Entry<String, List<CardComponent>> entry : playerCardComponents.entrySet()) {
-            for (CardComponent cardComp : entry.getValue()) {
-                if (cardComp.getCard().equals(card) && cardComp.getPositionIndex() == position) {
-                    playerName = (String) cardComp.getClientProperty("playerName");
+            List<CardComponent> cardComps = entry.getValue();
+
+            if (position >= 0 && position < cardComps.size()) {
+                CardComponent cc = cardComps.get(position);
+
+                // IMPORTANT: position + reference equality
+                if (cc.getCard() == card) {
+                    playerName = entry.getKey();
                     break;
                 }
             }
-            if (playerName != null) break;
+        }
+
+        if (playerName == null) {
+            System.err.println("ERROR: OtherPlayersPanel could not resolve playerName for position " + position);
+            return;
         }
 
         gamePanel.onOtherPlayerCardSelected(card, position, playerName);
     }
+
+
 
     @Override
     public void onCardDeselected(Card card, int position) {
