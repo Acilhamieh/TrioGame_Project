@@ -1,12 +1,6 @@
 package enums;
 
-/**
- * Enumeration representing the four game modes in Trio_UTBM.
- * Defines the rules for trio formation and victory conditions.
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 1.0
- */
+
 public enum GameMode {
     INDIVIDUAL_SIMPLE("Individual Simple", false, 3, 2),
     INDIVIDUAL_ADVANCED("Individual Advanced", false, 2, 3),
@@ -18,13 +12,6 @@ public enum GameMode {
     private final int triosRequired;
     private final int ectsPerTrio;
 
-    /**
-     * Constructor for GameMode enum
-     * @param displayName Human-readable name
-     * @param isTeamMode Whether this is a team-based mode
-     * @param triosRequired Number of trios needed to graduate
-     * @param ectsPerTrio ECTS credits awarded per trio
-     */
     GameMode(String displayName, boolean isTeamMode, int triosRequired, int ectsPerTrio) {
         this.displayName = displayName;
         this.isTeamMode = isTeamMode;
@@ -32,49 +19,37 @@ public enum GameMode {
         this.ectsPerTrio = ectsPerTrio;
     }
 
-    /**
-     * Check if this is a team mode
-     * @return true if team mode, false if individual
+    /*Check if this is a team mode
      */
     public boolean isTeamMode() {
         return isTeamMode;
     }
 
-    /**
-     * Get the number of trios required to win
-     * @return Number of trios needed
+    /*Get the number of trios required to win
      */
     public int getTriosRequired() {
         return triosRequired;
     }
 
-    /**
-     * Get ECTS credits awarded per trio
-     * @return ECTS per trio
+    /*Get ECTS credits awarded per trio
      */
     public int getEctsPerTrio() {
         return ectsPerTrio;
     }
 
-    /**
-     * Check if this is an advanced mode
-     * @return true if advanced mode (requires same branch)
+    /*Check if this is an advanced mode
      */
     public boolean isAdvancedMode() {
         return this == INDIVIDUAL_ADVANCED || this == TEAM_ADVANCED;
     }
 
-    /**
-     * Get total ECTS required to graduate
-     * @return Total ECTS needed
+    /*Get total ECTS required to graduate
      */
     public int getTotalEctsRequired() {
         return triosRequired * ectsPerTrio;
     }
 
-    /**
-     * Get the display name
-     * @return Display name as string
+    /* Get the display name
      */
     public String getDisplayName() {
         return displayName;

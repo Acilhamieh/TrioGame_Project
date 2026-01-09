@@ -6,13 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * Card component with FLIP ANIMATION for revealing system.
- * Supports both face-up (visible) and face-down (hidden) states.
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.0 - Flip animation for revealing
- */
 public class CardComponent extends JPanel {
     private Card card;
     private boolean selected;
@@ -32,21 +25,13 @@ public class CardComponent extends JPanel {
     private static final Color NON_CLICKABLE_BG = new Color(200, 200, 200);  // Gray
     private static final Color BORDER_COLOR = Color.DARK_GRAY;
 
-    /**
-     * Interface for card selection listeners
-     */
+    // Interface for card selection listeners
     public interface CardSelectionListener {
         void onCardSelected(Card card, int position);
         void onCardDeselected(Card card, int position);
     }
 
-    /**
-     * Constructor
-     * @param card The card
-     * @param listener Selection listener
-     * @param faceUp Is card face up?
-     * @param positionIndex Position in hand/hall
-     */
+
     public CardComponent(Card card, CardSelectionListener listener, boolean faceUp, int positionIndex) {
         this.card = card;
         this.listener = listener;
@@ -61,9 +46,8 @@ public class CardComponent extends JPanel {
         setupMouseListeners();
     }
 
-    /**
-     * Setup component properties
-     */
+    // Setup component properties
+
     private void setupComponent() {
         setPreferredSize(new Dimension(90, 110));
         updateBackground();
@@ -74,9 +58,8 @@ public class CardComponent extends JPanel {
         createContent();
     }
 
-    /**
-     * Create card content based on face up/down
-     */
+    // Create card content based on face up/down
+
     private void createContent() {
         removeAll();
 
@@ -90,9 +73,8 @@ public class CardComponent extends JPanel {
         repaint();
     }
 
-    /**
-     * Create face-up card content
-     */
+    //Create face-up card content
+
     private void createFaceUpContent() {
         add(Box.createVerticalGlue());
 
@@ -129,9 +111,8 @@ public class CardComponent extends JPanel {
         }
     }
 
-    /**
-     * Create face-down card content [?]
-     */
+    //Create face-down card content [?]
+
     private void createFaceDownContent() {
         add(Box.createVerticalGlue());
 
@@ -145,9 +126,8 @@ public class CardComponent extends JPanel {
         add(Box.createVerticalGlue());
     }
 
-    /**
-     * Get branch abbreviation
-     */
+    //Get branch abbreviation
+
     private String getBranchAbbr(Branch branch) {
         switch (branch) {
             case COMPUTER_SCIENCE: return "CS";
@@ -159,9 +139,8 @@ public class CardComponent extends JPanel {
         }
     }
 
-    /**
-     * Setup mouse listeners
-     */
+    //Setup mouse listeners
+
     private void setupMouseListeners() {
         addMouseListener(new MouseAdapter() {
             @Override
@@ -187,9 +166,8 @@ public class CardComponent extends JPanel {
         });
     }
 
-    /**
-     * Toggle selection
-     */
+    //Toggle selection
+
     private void toggleSelection() {
         selected = !selected;
         updateBackground();
@@ -203,9 +181,8 @@ public class CardComponent extends JPanel {
         }
     }
 
-    /**
-     * Update background color based on state
-     */
+    //Update background color based on state
+
     private void updateBackground() {
         Color bg;
 
@@ -235,9 +212,8 @@ public class CardComponent extends JPanel {
         repaint();
     }
 
-    /**
-     * Flip card face up (reveal)
-     */
+    //Flip card face up (reveal)
+
     public void flipFaceUp() {
         if (!faceUp) {
             faceUp = true;
@@ -246,9 +222,8 @@ public class CardComponent extends JPanel {
         }
     }
 
-    /**
-     * Flip card face down (hide)
-     */
+    //Flip card face down (hide)
+
     public void flipFaceDown() {
         if (faceUp) {
             faceUp = false;
@@ -257,9 +232,8 @@ public class CardComponent extends JPanel {
         }
     }
 
-    /**
-     * Set revealed state (highlighted during turn)
-     */
+    //Set revealed state (highlighted during turn)
+
     public void setRevealed(boolean revealed) {
         this.revealed = revealed;
         if (revealed) {
@@ -268,9 +242,8 @@ public class CardComponent extends JPanel {
         updateBackground();
     }
 
-    /**
-     * Set clickable state
-     */
+    //Set clickable state
+
     public void setClickable(boolean clickable) {
         this.clickable = clickable;
         setCursor(clickable ?

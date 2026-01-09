@@ -4,36 +4,20 @@ import model.*;
 import enums.*;
 import java.util.List;
 
-/**
- * Main game controller - manages the overall game flow and state.
- * Coordinates between model components and handles game logic.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class GameController {
     private Game game;
     private GameStateMachine stateMachine;
     private TurnController turnController;
     private boolean gameRunning;
 
-    /**
-     * Constructor for GameController
-     */
+
     public GameController() {
         this.game = new Game();
         this.stateMachine = new GameStateMachine();
         this.gameRunning = false;
     }
 
-    /**
-     * Initialize a new game with player configuration
-     * @param numPlayers Number of players (2-6)
-     * @param mode Game mode
-     * @param difficulty Difficulty level
-     * @param playerNames List of player names
-     * @return true if initialization successful
-     */
     public boolean initializeGame(int numPlayers, GameMode mode, Difficulty difficulty, List<String> playerNames) {
         try {
             // Validate inputs
@@ -71,9 +55,7 @@ public class GameController {
         }
     }
 
-    /**
-     * Start the game - transition to PLAYING state
-     */
+
     public void startGame() {
         if (stateMachine.getCurrentState() == GameState.SETUP) {
             stateMachine.transitionTo(GameState.PLAYING);
@@ -86,11 +68,7 @@ public class GameController {
         }
     }
 
-    /**
-     * Execute a player's turn
-     * @param cardIndices Indices of 3 cards selected (2 from hand, 1 from hall)
-     * @return true if turn was successful
-     */
+
     public boolean executeTurn(int[] cardIndices) {
         if (!gameRunning || stateMachine.getCurrentState() != GameState.PLAYING) {
             System.out.println("Game is not in playing state");
@@ -108,9 +86,7 @@ public class GameController {
         return success;
     }
 
-    /**
-     * Check if any player/team has won
-     */
+
     public void checkVictory() {
         stateMachine.transitionTo(GameState.CHECKING_VICTORY);
 
@@ -127,25 +103,19 @@ public class GameController {
         }
     }
 
-    /**
-     * Announce the winner and end the game
-     * @param winner The winning student
-     */
+
     private void announceWinner(Student winner) {
-        System.out.println("\n╔════════════════════════════════════════╗");
-        System.out.println("║          🎓 GRADUATION! 🎓             ║");
-        System.out.println("╚════════════════════════════════════════╝");
 
         if (game.getGameMode().isTeamMode() && winner.getTeam() != null) {
             Team team = winner.getTeam();
-            System.out.println("\n🏆 " + team.getTeamName() + " has graduated!");
+            System.out.println("\n " + team.getTeamName() + " has graduated!");
             System.out.println("Team ECTS: " + team.getTeamScore());
             System.out.println("Members:");
             for (Student member : team.getMembers()) {
                 System.out.println("  - " + member.getName() + " (" + member.getEctsCredits() + " ECTS)");
             }
         } else {
-            System.out.println("\n🏆 " + winner.getName() + " has graduated!");
+            System.out.println("\n " + winner.getName() + " has graduated!");
             System.out.println("ECTS Credits: " + winner.getEctsCredits());
             System.out.println("Trios completed: " + winner.getTrioCount());
         }
@@ -153,42 +123,29 @@ public class GameController {
         game.endGame();
     }
 
-    /**
-     * Get the current player
-     * @return Current student whose turn it is
-     */
+    /* Get the current player */
     public Student getCurrentPlayer() {
         return game.getTurnManager().getCurrentStudent();
     }
 
-    /**
-     * Get the game state
-     * @return Current game state
-     */
+    /* Get the game state */
     public GameState getGameState() {
         return stateMachine.getCurrentState();
     }
 
-    /**
-     * Check if game is running
-     * @return true if game is active
-     */
+    /* Check if game is running */
     public boolean isGameRunning() {
         return gameRunning;
     }
 
-    /**
-     * Get the game object
-     * @return The game instance
-     */
+    /* Get the game object */
     public Game getGame() {
         return game;
     }
 
-    /**
-     * Get game information summary
-     * @return String with game info
-     */
+    /* Get game information summary*/
+
+
     public String getGameInfo() {
         StringBuilder info = new StringBuilder();
         info.append("═══════════════════════════════════════\n");
@@ -201,9 +158,7 @@ public class GameController {
         return info.toString();
     }
 
-    /**
-     * Force end the game
-     */
+    /* Force end the game */
     public void endGame() {
         gameRunning = false;
         stateMachine.transitionTo(GameState.GAME_OVER);

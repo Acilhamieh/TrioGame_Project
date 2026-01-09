@@ -5,13 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Dialog for trading cards between team partners.
- * After a trio is won, opposing teams can trade one card each.
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 1.0 - Team mode trading
- */
+
 public class TradingDialog extends JDialog {
     private Student player1;
     private Student player2;

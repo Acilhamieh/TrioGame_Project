@@ -2,32 +2,21 @@ package model;
 
 import java.util.List;
 
-/**
- * Manages turn order and progression in Trio_UTBM.
- * Keeps track of current player and round number.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class TurnManager {
     private List<Student> students;
     private int currentPlayerIndex;
     private int roundNumber;
 
-    /**
-     * Constructor for TurnManager
-     * @param students List of students in the game
-     */
+
     public TurnManager(List<Student> students) {
         this.students = students;
         this.currentPlayerIndex = 0;
         this.roundNumber = 1;
     }
 
-    /**
-     * Get the current student whose turn it is
-     * @return The current student
-     */
+    //Get the current student whose turn it is
+
     public Student getCurrentStudent() {
         if (students == null || students.isEmpty()) {
             return null;
@@ -35,9 +24,9 @@ public class TurnManager {
         return students.get(currentPlayerIndex);
     }
 
-    /**
-     * Advance to the next player's turn
-     * Increments round number when returning to first player
+    /*
+      Advance to the next player's turn
+      Increments round number when returning to first player
      */
     public void nextTurn() {
         currentPlayerIndex++;
@@ -47,43 +36,33 @@ public class TurnManager {
         }
     }
 
-    /**
-     * Get the current player index
-     * @return Index of current player
-     */
+    //Get the current player index
+
     public int getCurrentPlayerIndex() {
         return currentPlayerIndex;
     }
 
-    /**
-     * Get the current round number
-     * @return Current round
-     */
+    //Get the current round number
+
     public int getRoundNumber() {
         return roundNumber;
     }
 
-    /**
-     * Get the total number of players
-     * @return Number of students
-     */
+    //Get the total number of players
+
     public int getPlayerCount() {
         return students != null ? students.size() : 0;
     }
 
-    /**
-     * Reset the turn manager to initial state
-     */
+    //Reset the turn manager to initial state
+
     public void reset() {
         this.currentPlayerIndex = 0;
         this.roundNumber = 1;
     }
 
-    /**
-     * Check if it's a specific student's turn
-     * @param student The student to check
-     * @return true if it's this student's turn
-     */
+    //Check if it's a specific student's turn
+
     public boolean isCurrentPlayer(Student student) {
         return getCurrentStudent() != null && getCurrentStudent().equals(student);
     }

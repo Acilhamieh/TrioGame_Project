@@ -4,13 +4,7 @@ import controller.GameController;
 import model.*;
 import enums.*;
 
-/**
- * Displays the current game state during gameplay.
- * Shows player hands, lecture hall, and scores.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class GameView {
     private CardDisplayer cardDisplayer;
 

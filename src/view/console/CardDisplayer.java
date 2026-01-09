@@ -4,19 +4,10 @@ import model.*;
 import enums.Branch;
 import java.util.List;
 
-/**
- * Utility class for displaying cards in the console.
- * Provides formatted card visualization.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class CardDisplayer {
 
-    /**
-     * Display a hand of cards with indices
-     * @param hand The hand to display
-     */
+
     public void displayHand(Hand hand) {
         List<Card> cards = hand.getAllCards();
 
@@ -42,10 +33,8 @@ public class CardDisplayer {
         }
     }
 
-    /**
-     * Display lecture hall in 3x3 grid
-     * @param hall The lecture hall to display
-     */
+    //Display lecture hall in 3x3 grid
+
     public void displayLectureHall(LectureHall hall) {
         List<Card> cards = hall.getAllCards();
 
@@ -72,10 +61,8 @@ public class CardDisplayer {
         }
     }
 
-    /**
-     * Display a single card inline with branch icon
-     * @param card The card to display
-     */
+    //Display a single card inline with branch icon
+
     private void displayCardInline(Card card) {
         String icon = getBranchIcon(card.getBranch());
         String code = String.format("%-4s", card.getCourseCode());
@@ -87,25 +74,16 @@ public class CardDisplayer {
         }
     }
 
-    /**
-     * Display a card in detailed box format
-     * @param card The card to display
-     */
+    //Display a card in detailed box format
+
     public void displayCardBox(Card card) {
         String code = card.getCourseCode();
         String branch = getBranchAbbreviation(card.getBranch());
         String icon = getBranchIcon(card.getBranch());
 
-        System.out.println("┌─────────┐");
-        System.out.println("│ " + icon + " " + String.format("%-4s", code) + " │");
-        System.out.println("│  " + String.format("%-6s", branch) + " │");
-        System.out.println("└─────────┘");
     }
 
-    /**
-     * Display multiple cards in a row
-     * @param cards List of cards to display
-     */
+    //Display multiple cards in a row
     public void displayCardRow(List<Card> cards) {
         for (int i = 0; i < cards.size(); i++) {
             displayCardInline(cards.get(i));
@@ -116,16 +94,9 @@ public class CardDisplayer {
         System.out.println();
     }
 
-    /**
-     * Display a trio with validation result
-     * @param card1 First card
-     * @param card2 Second card
-     * @param card3 Third card
-     * @param isValid Whether trio is valid
-     * @param ects ECTS credits awarded
-     */
+
     public void displayTrio(Card card1, Card card2, Card card3, boolean isValid, int ects) {
-        System.out.println("\n🎯 Trio:");
+        System.out.println("\n Trio:");
         System.out.print("   ");
         displayCardInline(card1);
         System.out.print(" + ");
@@ -135,17 +106,14 @@ public class CardDisplayer {
         System.out.println();
 
         if (isValid) {
-            System.out.println("   ✅ Valid! +" + ects + " ECTS");
+            System.out.println("    Valid! +" + ects + " ECTS");
         } else {
-            System.out.println("   ❌ Invalid trio");
+            System.out.println("    Invalid trio");
         }
     }
 
-    /**
-     * Get branch icon for display
-     * @param branch The branch
-     * @return Icon string
-     */
+    //Get branch icon for display
+
     private String getBranchIcon(Branch branch) {
         switch (branch) {
             case COMPUTER_SCIENCE:
@@ -163,11 +131,8 @@ public class CardDisplayer {
         }
     }
 
-    /**
-     * Get branch abbreviation
-     * @param branch The branch
-     * @return Abbreviation string
-     */
+    //Get branch abbreviation
+
     private String getBranchAbbreviation(Branch branch) {
         switch (branch) {
             case COMPUTER_SCIENCE:
@@ -185,25 +150,20 @@ public class CardDisplayer {
         }
     }
 
-    /**
-     * Display deck information
-     * @param deck The deck
-     */
+    //Display deck information
+
     public void displayDeckInfo(Deck deck) {
         System.out.println("🎲 Deck: " + deck.getRemainingCount() + " cards remaining");
     }
 
-    /**
-     * Display a separator line
-     */
+    //Display a separator line
+
     public void displaySeparator() {
         System.out.println("─".repeat(50));
     }
 
-    /**
-     * Display a header
-     * @param title Header title
-     */
+    //display a header
+
     public void displayHeader(String title) {
         System.out.println("\n" + "═".repeat(50));
         System.out.println("  " + title);

@@ -6,13 +6,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Panel displaying YOUR hand.
- * REVEALING MODE: All cards face-up, only first/last+duplicates clickable
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.0 - Revealing system with clickable positions
- */
+
 public class HandPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
     private List<CardComponent> cardComponents;
@@ -34,9 +28,8 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
         setPreferredSize(new Dimension(0, 140));
     }
 
-    /**
-     * Update display for REVEALING mode
-     * All cards face-up, only revealable positions clickable
+    /*Update display for REVEALING mode
+      All cards face-up, only revealable positions clickable
      */
     public void updateDisplay(Hand hand) {
         this.currentHand = hand;
@@ -64,34 +57,30 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
         repaint();
     }
 
-    /**
-     * OLD METHOD: For flexible mode compatibility
-     */
+    // OLD METHOD: For flexible mode compatibility
+
     public void updateDisplayAllVisible(Hand hand) {
         updateDisplay(hand);  // Same behavior in revealing mode
     }
 
-    /**
-     * Clear all selections
-     */
+    //Clear all selections
+
     public void clearSelection() {
         for (CardComponent cardComp : cardComponents) {
             cardComp.setSelected(false);
         }
     }
 
-    /**
-     * Clear all reveals (flip back face down not needed - stays face up)
-     */
+    //Clear all reveals (flip back face down not needed - stays face up)
+
     public void clearReveals() {
         for (CardComponent cardComp : cardComponents) {
             cardComp.setRevealed(false);
         }
     }
 
-    /**
-     * Mark a card as revealed (highlight it)
-     */
+    //Mark a card as revealed (highlight it)
+
     public void markCardRevealed(Card card, int position) {
         //  FIX: Use position directly
         if (position >= 0 && position < cardComponents.size()) {
@@ -105,9 +94,8 @@ public class HandPanel extends JPanel implements CardComponent.CardSelectionList
             cardComp.setClickable(false);
         }
     }
-    /**
-     * Enable/disable all cards
-     */
+    //Enable/disable all cards
+
     public void setCardsEnabled(boolean enabled) {
         if (currentHand != null) {
             List<Integer> revealablePositions = currentHand.getRevealablePositions();

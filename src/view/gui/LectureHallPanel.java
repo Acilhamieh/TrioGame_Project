@@ -6,13 +6,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Panel displaying lecture hall.
- * REVEALING MODE: All cards face-down [?], all clickable
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.0 - Revealing system
- */
+
 public class LectureHallPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
     private List<CardComponent> cardComponents;
@@ -37,9 +31,9 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
         ));
     }
 
-    /**
-     * Update display for REVEALING mode
-     * All cards face-down, all clickable
+    /*
+      Update display for REVEALING mode
+      All cards face-down, all clickable
      */
     public void updateDisplay(LectureHall lectureHall) {
         removeAll();
@@ -87,27 +81,24 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
         return panel;
     }
 
-    /**
-     * Clear all selections
-     */
+    //Clear all selections
+
     public void clearSelection() {
         for (CardComponent cardComp : cardComponents) {
             cardComp.setSelected(false);
         }
     }
 
-    /**
-     * Clear all reveals
-     */
+    //Clear all reveals
+
     public void clearReveals() {
         for (CardComponent cardComp : cardComponents) {
             cardComp.setRevealed(false);
         }
     }
 
-    /**
-     * Mark a card as revealed (flip face up and highlight)
-     */
+    //mark a card as revealed (flip face up and highlight)
+
     public void markCardRevealed(Card card, int position) {
         //  FIX: Use position directly
         if (position >= 0 && position < cardComponents.size()) {
@@ -115,18 +106,16 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
             cardComp.setRevealed(true);
         }
     }
-    /**
-     *  NEW: Disable a card after it's been clicked to prevent double-clicks
-     */
+    //NEW: Disable a card after it's been clicked to prevent double-clicks
+
     public void disableCard(int position) {
         if (position >= 0 && position < cardComponents.size()) {
             CardComponent cardComp = cardComponents.get(position);
             cardComp.setClickable(false);
         }
     }
-    /**
-     * Flip a card back face down
-     */
+    //Flip a card back face down
+
     public void flipCardBack(int position) {
         for (CardComponent cardComp : cardComponents) {
             if (cardComp.getPositionIndex() == position) {
@@ -137,9 +126,8 @@ public class LectureHallPanel extends JPanel implements CardComponent.CardSelect
         }
     }
 
-    /**
-     * Enable/disable all cards
-     */
+    //Enable/disable all cards
+
     public void setCardsEnabled(boolean enabled) {
         for (CardComponent cardComp : cardComponents) {
             cardComp.setClickable(enabled);

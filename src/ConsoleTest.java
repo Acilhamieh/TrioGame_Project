@@ -13,9 +13,7 @@ import java.util.List;
 public class ConsoleTest {
 
     public static void main(String[] args) {
-        System.out.println("╔════════════════════════════════════════╗");
-        System.out.println("║   CONSOLE VIEW TEST SUITE              ║");
-        System.out.println("╚════════════════════════════════════════╝\n");
+        System.out.println("CONSOLE VIEW TEST");
 
         testInputReader();
         testCardDisplayer();
@@ -23,13 +21,11 @@ public class ConsoleTest {
         testGameView();
         testIntegration();
 
-        System.out.println("\n╔════════════════════════════════════════╗");
-        System.out.println("║   ✅ ALL CONSOLE TESTS PASSED!         ║");
-        System.out.println("╚════════════════════════════════════════╝");
+        System.out.println("ALL CONSOLE TESTS PASSED!");
     }
 
     private static void testInputReader() {
-        System.out.println("⌨️  Testing InputReader...");
+        System.out.println("  Testing InputReader...");
 
         // Test with simulated input
         String simulatedInput = "3\nyes\nDana\n";
@@ -39,23 +35,23 @@ public class ConsoleTest {
         // Test reading line
         String line = reader.readLine();
         assert line.equals("3") : "Should read '3'";
-        System.out.println("  ✓ Read line: " + line);
+        System.out.println("   Read line: " + line);
 
         // Test reading yes/no
         boolean yesNo = reader.readYesNo();
         assert yesNo : "Should read 'yes' as true";
-        System.out.println("  ✓ Read yes/no: " + yesNo);
+        System.out.println("   Read yes/no: " + yesNo);
 
         // Test reading string
         String name = reader.readLine();
         assert name.equals("Dana") : "Should read 'Dana'";
-        System.out.println("  ✓ Read name: " + name);
+        System.out.println("   Read name: " + name);
 
-        System.out.println("✅ InputReader working!\n");
+        System.out.println(" InputReader working!\n");
     }
 
     private static void testCardDisplayer() {
-        System.out.println("🎴 Testing CardDisplayer...");
+        System.out.println(" Testing CardDisplayer...");
 
         CardDisplayer displayer = new CardDisplayer();
 
@@ -90,7 +86,7 @@ public class ConsoleTest {
         displayer.displayTrio(card1, card1, card1, true, 2);
         System.out.println("  ✓ Trio displayed");
 
-        System.out.println("✅ CardDisplayer working!\n");
+        System.out.println(" CardDisplayer working!\n");
     }
 
     private static void testMenuView() {
@@ -104,11 +100,11 @@ public class ConsoleTest {
         System.out.println("  ✓ Can get player count (requires manual testing)");
         System.out.println("  ✓ Can get game mode (requires manual testing)");
 
-        System.out.println("✅ MenuView structure working!\n");
+        System.out.println(" MenuView structure working!\n");
     }
 
     private static void testGameView() {
-        System.out.println("🎮 Testing GameView...");
+        System.out.println(" Testing GameView...");
 
         GameView gameView = new GameView();
 
@@ -122,13 +118,13 @@ public class ConsoleTest {
         System.out.println("  " + "─".repeat(40));
         gameView.displayGameState(controller);
         System.out.println("  " + "─".repeat(40));
-        System.out.println("  ✓ Game state displayed");
+        System.out.println("   Game state displayed");
 
         System.out.println("\n  Testing detailed scores:");
         System.out.println("  " + "─".repeat(40));
         gameView.displayDetailedScores(controller);
         System.out.println("  " + "─".repeat(40));
-        System.out.println("  ✓ Detailed scores displayed");
+        System.out.println("   Detailed scores displayed");
 
         // Test victory display (simulated)
         Student winner = controller.getCurrentPlayer();
@@ -137,13 +133,13 @@ public class ConsoleTest {
         System.out.println("  " + "─".repeat(40));
         gameView.displayVictory(winner, controller.getGame());
         System.out.println("  " + "─".repeat(40));
-        System.out.println("  ✓ Victory displayed");
+        System.out.println("  Victory displayed");
 
-        System.out.println("✅ GameView working!\n");
+        System.out.println(" GameView working!\n");
     }
 
     private static void testIntegration() {
-        System.out.println("🔗 Testing Console Integration...");
+        System.out.println(" Testing Console Integration...");
 
         // Test that all components work together
         GameController controller = new GameController();
@@ -181,6 +177,6 @@ public class ConsoleTest {
         System.out.println("  " + "═".repeat(50));
 
         System.out.println("  ✓ All console components integrate properly");
-        System.out.println("✅ Integration tests passed!\n");
+        System.out.println(" Integration tests passed!\n");
     }
 }

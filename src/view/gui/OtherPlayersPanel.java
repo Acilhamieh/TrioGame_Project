@@ -8,13 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Panel displaying other players' hands.
- * REVEALING MODE: All cards face-down [?], only first/last clickable
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 3.1 - Fixed position sync bug + double-click prevention
- */
+
 public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelectionListener {
     private GamePanel gamePanel;
     private Map<String, List<CardComponent>> playerCardComponents;
@@ -41,12 +35,10 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         this.compactMode = compact;
     }
 
-    /**
-     * Update display for REVEALING mode
-     * All cards face-down, only first/last clickable
-     */
+    //Update display for REVEALING mode
+
     public void updateDisplay(List<Student> allPlayers, Student currentPlayer) {
-        // ✅ DEBUG: Track position updates
+        // Track position updates
         System.out.println("DEBUG OtherPlayersPanel: updateDisplay() called");
 
         removeAll();
@@ -65,7 +57,7 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         revalidate();
         repaint();
 
-        // ✅ DEBUG: Verify positions are correct
+        // Verify positions are correct
         System.out.println("DEBUG OtherPlayersPanel: Card components created:");
         for (Map.Entry<String, List<CardComponent>> entry : playerCardComponents.entrySet()) {
             System.out.println("  Player " + entry.getKey() + " has " + entry.getValue().size() + " cards");
@@ -77,9 +69,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     * Create panel for one player - REVEALING mode
-     */
+    // Create panel for one player - REVEALING mode
+
     private JPanel createPlayerHandPanel(Student player) {
         JPanel panel = new JPanel();
         int padding = compactMode ? 3 : 5;
@@ -129,9 +120,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         return panel;
     }
 
-    /**
-     * Clear all selections
-     */
+    //Clear all selections
+
     public void clearSelection() {
         for (List<CardComponent> cardComps : playerCardComponents.values()) {
             for (CardComponent cardComp : cardComps) {
@@ -140,9 +130,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     * Clear all reveals
-     */
+    //Clear all reveals
+
     public void clearReveals() {
         for (List<CardComponent> cardComps : playerCardComponents.values()) {
             for (CardComponent cardComp : cardComps) {
@@ -151,9 +140,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     *  FIXED: Mark a card as revealed using position directly
-     */
+    //Mark a card as revealed using position directly
+
     public void markCardRevealed(String playerName, Card card, int position) {
         List<CardComponent> cardComps = playerCardComponents.get(playerName);
         if (cardComps != null && position >= 0 && position < cardComps.size()) {
@@ -164,9 +152,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     *  NEW: Disable a card after it's been clicked to prevent double-clicks
-     */
+    //Disable a card after it's been clicked to prevent double-clicks
+
     public void disableCard(String playerName, int position) {
         List<CardComponent> cardComps = playerCardComponents.get(playerName);
         if (cardComps != null && position >= 0 && position < cardComps.size()) {
@@ -175,9 +162,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     * Flip a card back face down
-     */
+    //Flip a card back face down
+
     public void flipCardBack(String playerName, int position) {
         List<CardComponent> cardComps = playerCardComponents.get(playerName);
         if (cardComps != null) {
@@ -191,9 +177,8 @@ public class OtherPlayersPanel extends JPanel implements CardComponent.CardSelec
         }
     }
 
-    /**
-     * Enable/disable all cards
-     */
+    //Enable/disable all cards
+
     public void setCardsEnabled(boolean enabled) {
         for (Map.Entry<String, List<CardComponent>> entry : playerCardComponents.entrySet()) {
             for (CardComponent cardComp : entry.getValue()) {

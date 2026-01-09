@@ -6,13 +6,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Menu panel for game setup and main menu.
- * REVEALING GAME: 3-6 players
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.1 - UI fix: Player names panel is now scrollable
- */
+
 public class MenuPanel extends JPanel {
     private MainWindow mainWindow;
 
@@ -26,7 +20,7 @@ public class MenuPanel extends JPanel {
     private JButton aboutButton;
     private JButton exitButton;
 
-    // NEW: panel for names (scrollable)
+    //  panel for names (scrollable)
     private JPanel playerNamesPanel;
 
     public MenuPanel(MainWindow mainWindow) {

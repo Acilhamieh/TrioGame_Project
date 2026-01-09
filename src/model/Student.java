@@ -4,13 +4,7 @@ import enums.Branch;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a student player in Trio_UTBM.
- * Students accumulate ECTS credits by forming trios.
- *
- * @author Acil HAMIEH
- * @version 1.2 - Fixed Advanced mode: PFE trios excluded from linked trio counting
- */
+
 public class Student {
     private String name;
     private Hand hand;
@@ -18,10 +12,7 @@ public class Student {
     private List<Trio> completedTrios;
     private Team team;
 
-    /**
-     * Constructor for a student
-     * @param name The student's name
-     */
+
     public Student(String name) {
         this.name = name;
         this.hand = new Hand(this);
@@ -61,19 +52,14 @@ public class Student {
         return completedTrios.size();
     }
 
-    /**
-     * Check if student has graduated (reached 6 ECTS)
-     * @return true if student has 6 or more ECTS
-     */
+    // Check if student has graduated (reached 6 ECTS)
+
     public boolean hasGraduated() {
         return ectsCredits >= 6;
     }
 
-    /**
-     * NEW: Check if student has won trio of 7 (PFE)
-     * Victory condition: Win trio of PFE (ID:7)
-     * @return true if has won trio of PFE
-     */
+    // Check if student has won trio of 7 (PFE)
+
     public boolean hasWonTrioOfSeven() {
         for (Trio trio : completedTrios) {
             if (trio.isPFETrio()) { // PFE has ID:7
@@ -83,25 +69,20 @@ public class Student {
         return false;
     }
 
-    /**
-     * NEW: Check if student has 3 trios (victory condition)
-     * @return true if has 3 or more trios
-     */
+    // Check if student has 3 trios (victory condition)
+
     public boolean hasThreeTrios() {
         return completedTrios.size() >= 3;
     }
 
     /**
-     * NEW: Check if student has won 2 linked trios (Advanced/Picante mode)
-     * Linked = same branch (EXCLUDING PFE trios)
-     *
-     * RULES:
-     * - CS + CS = WIN ✅
-     * - ME + ME = WIN ✅
-     * - CS + ME = NO WIN ❌
-     * - PFE trios don't count (they have instant-win rule)
-     *
-     * @return true if has 2 trios from same branch
+      NEW: Check if student has won 2 linked trios (Advanced/Picante mode)
+      Linked = same branch (EXCLUDING PFE trios)
+      RULES:
+       CS + CS = WIN
+       ME + ME = WIN
+       CS + ME = NO WIN
+       PFE trios don't count (they have instant-win rule)
      */
     public boolean hasTwoLinkedTrios() {
         if (completedTrios.size() < 2) {
@@ -121,7 +102,7 @@ public class Student {
         for (Trio trio : completedTrios) {
             Branch branch = trio.getBranch();
 
-            // ✅ CRITICAL FIX: Skip PFE trios (they have their own instant-win rule)
+            //  Skip PFE trios (they have their own instant-win rule)
             if (branch == Branch.SPECIAL) {
                 System.out.println("  Skipping PFE trio (special branch)");
                 continue;
@@ -144,26 +125,20 @@ public class Student {
         return result;
     }
 
-    /**
-     * NEW: Check victory for simple mode
-     * Win: 3 trios OR trio of 7 (PFE)
-     * @return true if won
-     */
+    // Check victory for simple mode
+
     public boolean hasWonSimple() {
         return hasThreeTrios() || hasWonTrioOfSeven();
     }
 
     /**
-     * NEW: Check victory for Advanced/Picante mode
-     * Win: 2 linked trios (same branch) OR trio of 7 (PFE)
-     *
-     * EXAMPLES:
-     * - 2 CS trios = WIN ✅
-     * - 2 ME trios = WIN ✅
-     * - 1 CS + 1 ME = NO WIN ❌
-     * - 1 PFE trio = INSTANT WIN ✅
-     *
-     * @return true if won
+     NEW: Check victory for Advanced/Picante mode
+      Win: 2 linked trios (same branch) OR trio of 7 (PFE)
+     EXAMPLES:
+     2 CS trios = WIN
+      2 ME trios = WIN
+      1 CS + 1 ME = NO WIN
+      1 PFE trio = INSTANT WIN
      */
     public boolean hasWonPicante() {
         return hasTwoLinkedTrios() || hasWonTrioOfSeven();

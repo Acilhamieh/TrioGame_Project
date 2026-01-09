@@ -4,36 +4,25 @@ import enums.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Handles menu display and game configuration.
- * Gets game settings from the user.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class MenuView {
     private InputReader inputReader;
 
-    /**
-     * Constructor for MenuView
-     */
+
     public MenuView() {
         this.inputReader = new InputReader();
     }
 
-    /**
-     * Show main menu and get user choice
-     * @return Menu choice (1-4)
-     */
+
     public int showMainMenu() {
         System.out.println("\n" + "═".repeat(50));
         System.out.println("                   MAIN MENU");
         System.out.println("═".repeat(50));
         System.out.println();
-        System.out.println("  1. 🎮 New Game");
-        System.out.println("  2. 📖 Rules");
-        System.out.println("  3. ℹ️  About");
-        System.out.println("  4. 🚪 Exit");
+        System.out.println("  1.  New Game");
+        System.out.println("  2.  Rules");
+        System.out.println("  3. ️  About");
+        System.out.println("  4.  Exit");
         System.out.println();
         System.out.print("Enter your choice (1-4): ");
 
@@ -46,13 +35,11 @@ public class MenuView {
         }
     }
 
-    /**
-     * Get number of players from user
-     * @return Number of players (2-6), or -1 if cancelled
-     */
+    //Get number of players from user
+
     public int getPlayerCount() {
-        System.out.println("\n👥 How many players?");
-        System.out.println("  2-6 players");
+        System.out.println("\n How many players?");
+        System.out.println("  3-6 players");
         System.out.print("\nNumber of players: ");
 
         String input = inputReader.readLine().trim();
@@ -66,21 +53,18 @@ public class MenuView {
             if (count >= 2 && count <= 6) {
                 return count;
             } else {
-                System.out.println("❌ Must be 2-6 players!");
+                System.out.println(" Must be 3-6 players!");
                 return getPlayerCount(); // Retry
             }
         } catch (NumberFormatException e) {
-            System.out.println("❌ Invalid input!");
+            System.out.println(" Invalid input!");
             return getPlayerCount(); // Retry
         }
     }
 
-    /**
-     * Get game mode from user
-     * @return Selected GameMode, or null if cancelled
-     */
+
     public GameMode getGameMode() {
-        System.out.println("\n🎯 Select Game Mode:");
+        System.out.println("\n Select Game Mode:");
         System.out.println();
         System.out.println("  1. 👤 Individual - Simple Mode");
         System.out.println("     └─ 3 matching cards = 2 ECTS");
@@ -114,19 +98,16 @@ public class MenuView {
                 case 4:
                     return GameMode.TEAM_ADVANCED;
                 default:
-                    System.out.println("❌ Invalid choice!");
+                    System.out.println(" Invalid choice!");
                     return getGameMode(); // Retry
             }
         } catch (NumberFormatException e) {
-            System.out.println("❌ Invalid input!");
+            System.out.println(" Invalid input!");
             return getGameMode(); // Retry
         }
     }
 
-    /**
-     * Get difficulty level from user
-     * @return Selected Difficulty, or null if cancelled
-     */
+
     public Difficulty getDifficulty() {
         System.out.println("\n⚙️  Select Difficulty:");
         System.out.println();
@@ -152,11 +133,11 @@ public class MenuView {
                 case 2:
                     return Difficulty.ADVANCED;
                 default:
-                    System.out.println("❌ Invalid choice!");
+                    System.out.println(" Invalid choice!");
                     return getDifficulty();
             }
         } catch (NumberFormatException e) {
-            System.out.println("❌ Invalid input!");
+            System.out.println(" Invalid input!");
             return getDifficulty();
         }
     }
@@ -169,7 +150,7 @@ public class MenuView {
     public List<String> getPlayerNames(int count) {
         List<String> names = new ArrayList<>();
 
-        System.out.println("\n✏️  Enter Player Names:");
+        System.out.println("\n  Enter Player Names:");
         System.out.println("(Names should be 1-20 characters)\n");
 
         for (int i = 1; i <= count; i++) {
@@ -181,7 +162,7 @@ public class MenuView {
         }
 
         // Confirm names
-        System.out.println("\n✅ Players:");
+        System.out.println("\n Players:");
         for (int i = 0; i < names.size(); i++) {
             System.out.println("   " + (i + 1) + ". " + names.get(i));
         }
@@ -197,11 +178,8 @@ public class MenuView {
         }
     }
 
-    /**
-     * Get a single player name
-     * @param playerNumber Player number
-     * @return Player name, or null if cancelled
-     */
+    // Get a single player name
+
     private String getPlayerName(int playerNumber) {
         while (true) {
             System.out.print("Player " + playerNumber + " name: ");
@@ -212,12 +190,12 @@ public class MenuView {
             }
 
             if (name.isEmpty()) {
-                System.out.println("❌ Name cannot be empty!");
+                System.out.println(" Name cannot be empty!");
                 continue;
             }
 
             if (name.length() > 20) {
-                System.out.println("❌ Name too long (max 20 characters)!");
+                System.out.println(" Name too long (max 20 characters)!");
                 continue;
             }
 
@@ -225,16 +203,11 @@ public class MenuView {
         }
     }
 
-    /**
-     * Display game configuration summary
-     * @param mode Game mode
-     * @param difficulty Difficulty level
-     * @param playerNames List of players
-     */
+    // Display game configuration summary
+
     public void displayConfiguration(GameMode mode, Difficulty difficulty, List<String> playerNames) {
-        System.out.println("\n╔════════════════════════════════════════════════════╗");
-        System.out.println("║              GAME CONFIGURATION                    ║");
-        System.out.println("╚════════════════════════════════════════════════════╝");
+        System.out.println("\n Game configuration");
+
         System.out.println();
         System.out.println("  Mode: " + mode.getDisplayName());
         System.out.println("  Difficulty: " + difficulty.getDisplayName());

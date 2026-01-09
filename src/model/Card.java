@@ -2,50 +2,25 @@ package model;
 
 import enums.Branch;
 
-/**
- * Represents a course card in Trio_UTBM.
- * Each card has a course code, branch, and unique ID for sorting.
- *
- * CORRECTED IDs: PFE=7 (The 7), GI28=1
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 2.2 - Corrected ID system
- */
 public class Card {
     private final String courseCode;
     private final Branch branch;
     private final int id;
 
-    /**
-     * NEW Constructor with ID (for memory game)
-     * @param courseCode The course code (e.g., "AP4B", "SY41")
-     * @param branch The engineering branch
-     * @param id The card ID for sorting (1-12)
-     */
     public Card(String courseCode, Branch branch, int id) {
         this.courseCode = courseCode;
         this.branch = branch;
         this.id = id;
     }
 
-    /**
-     * OLD Constructor WITHOUT ID (backward compatible)
-     * Automatically assigns ID based on course code
-     * @param courseCode The course code
-     * @param branch The engineering branch
-     */
+
     public Card(String courseCode, Branch branch) {
         this.courseCode = courseCode;
         this.branch = branch;
         this.id = getIdFromCourseCode(courseCode);
     }
 
-    /**
-     * Auto-assign ID based on course code (for backward compatibility)
-     * CORRECTED: PFE=7, GI28=1
-     * @param courseCode The course code
-     * @return The corresponding ID (1-12)
-     */
+
     private static int getIdFromCourseCode(String courseCode) {
         switch (courseCode.toUpperCase()) {
             case "SY41": return 12;
@@ -64,43 +39,32 @@ public class Card {
         }
     }
 
-    /**
-     * Get the course code
-     * @return Course code
-     */
+    /* Get the course code */
     public String getCourseCode() {
         return courseCode;
     }
 
-    /**
-     * Get the branch
-     * @return Branch
+    /* Get the branch
      */
     public Branch getBranch() {
         return branch;
     }
 
-    /**
-     * Get the card ID for sorting
-     * @return Card ID (1-12)
+    /*Get the card ID for sorting
      */
     public int getId() {
         return id;
     }
 
-    /**
-     * Check if this is a PFE card
-     * PFE = ID:7 = "The 7" = Special victory card
-     * @return true if this is a PFE card
+    /* Check if this is a PFE card
+     PFE = ID:7 = "The 7" = Special victory card
+     @return true if this is a PFE card
      */
     public boolean isPFE() {
         return "PFE".equalsIgnoreCase(courseCode) || id == 7;
     }
 
-    /**
-     * Check if this card matches another card (same course code)
-     * @param other The other card to compare
-     * @return true if course codes match
+    /*Check if this card matches another card (same course code)
      */
     public boolean matches(Card other) {
         if (other == null) return false;
@@ -127,9 +91,7 @@ public class Card {
         return courseCode + " (ID:" + id + ")";
     }
 
-    /**
-     * Get display string with branch info
-     * @return Formatted string
+    /* Get display string with branch info
      */
     public String toDisplayString() {
         return courseCode + "\nID:" + id + "\n" + branch.name();

@@ -5,30 +5,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Represents a student's hand of cards in Trio_UTBM.
- * Cards are kept sorted by ID (HIGHEST to LOWEST: 12 → 1).
- *
- * @author Dana SLEIMAN
- * @version 2.3 - Fixed auto-reveal with CardWithPosition
- */
+
 public class Hand {
     private List<Card> cards;
     private Student owner;
 
-    /**
-     * Constructor for a hand
-     * @param owner The student who owns this hand
-     */
+
     public Hand(Student owner) {
         this.owner = owner;
         this.cards = new ArrayList<>();
     }
 
-    /**
-     * Add a card to the hand and sort by ID (highest to lowest)
-     * @param card The card to add
-     */
+
     public void addCard(Card card) {
         if (card != null) {
             cards.add(card);
@@ -36,20 +24,12 @@ public class Hand {
         }
     }
 
-    /**
-     * Remove a card from the hand
-     * @param card The card to remove
-     * @return true if card was removed successfully
-     */
+
     public boolean removeCard(Card card) {
         return cards.remove(card);
     }
 
-    /**
-     * Remove a card at a specific index
-     * @param index The index of the card to remove
-     * @return The removed card, or null if index invalid
-     */
+
     public Card removeCard(int index) {
         if (index >= 0 && index < cards.size()) {
             return cards.remove(index);
@@ -57,11 +37,7 @@ public class Hand {
         return null;
     }
 
-    /**
-     * Get a card at a specific index without removing it
-     * @param index The index of the card
-     * @return The card at that index, or null if invalid
-     */
+
     public Card getCard(int index) {
         if (index >= 0 && index < cards.size()) {
             return cards.get(index);
@@ -69,9 +45,8 @@ public class Hand {
         return null;
     }
 
-    /**
-     * Sort cards by ID (HIGHEST to LOWEST: 12 → 1)
-     * This ensures predictable order for memory game
+    /*Sort cards by ID (HIGHEST to LOWEST: 12 → 1)
+      This ensures predictable order for memory game
      */
     private void sortCards() {
         Collections.sort(cards, new Comparator<Card>() {
@@ -83,106 +58,71 @@ public class Hand {
         });
     }
 
-    /**
-     * Get the number of cards in hand
-     * @return Number of cards
-     */
+    // Get the number of cards in hand
+
     public int getSize() {
         return cards.size();
     }
 
-    /**
-     * Check if hand is empty
-     * @return true if no cards in hand
-     */
+    //Check if hand is empty
+
     public boolean isEmpty() {
         return cards.isEmpty();
     }
 
-    /**
-     * Get all cards in hand (defensive copy)
-     * @return List of all cards (sorted by ID)
-     */
+    // Get all cards in hand (defensive copy)
+
     public List<Card> getAllCards() {
         return new ArrayList<>(cards);
     }
 
-    /**
-     * Check if hand contains a specific card
-     * @param card The card to check for
-     * @return true if card is in hand
-     */
+    // Check if hand contains a specific card
+
     public boolean contains(Card card) {
         return cards.contains(card);
     }
 
-    /**
-     * Clear all cards from hand
-     */
+    //Clear all cards from hand
+
     public void clear() {
         cards.clear();
     }
 
-    /**
-     * Get the first card (highest ID) - always visible
-     * @return First card or null if empty
-     */
+    //Get the first card (highest ID) - always visible
+
     public Card getFirstCard() {
         return cards.isEmpty() ? null : cards.get(0);
     }
 
-    /**
-     * Get the last card (lowest ID) - always visible
-     * @return Last card or null if empty
-     */
+    //Get the last card (lowest ID) - always visible
+
     public Card getLastCard() {
         return cards.isEmpty() ? null : cards.get(cards.size() - 1);
     }
 
-    /**
-     * Check if a card at position should be visible (OLD METHOD - for display only)
-     * Only first and last cards are visible in memory game mode
-     * @param index The position (0-based)
-     * @return true if should be visible
-     */
     public boolean isCardVisible(int index) {
         if (cards.isEmpty()) return false;
         return (index == 0) || (index == cards.size() - 1);
     }
 
-    /**
-     * NEW: Check if a position can be revealed (for clicking)
-     * Uses HandPositionHelper to determine first/last + duplicates
-     * @param position The position to check
-     * @return true if position can be revealed
-     */
+
     public boolean isPositionRevealable(int position) {
         return HandPositionHelper.canRevealPosition(this, position);
     }
 
-    /**
-     * NEW: Get all revealable positions (for highlighting UI)
-     * @return List of positions that can be revealed
-     */
+    //NEW: Get all revealable positions (for highlighting UI)
+
     public List<Integer> getRevealablePositions() {
         return HandPositionHelper.getRevealablePositions(this);
     }
 
-    /**
-     * ✅ ULTIMATE FIX: Find all duplicate cards with the same course code
-     * Used for auto-revealing duplicates
-     * Returns CardWithPosition to avoid indexOf() issues with duplicate cards
-     *
-     * @param courseCode The course code to find duplicates of
-     * @param excludePosition Position to exclude (the card already revealed)
-     * @return List of CardWithPosition objects (cards WITH their actual positions)
-     */
+
     public List<CardWithPosition> findDuplicates(String courseCode, int excludePosition) {
         List<CardWithPosition> duplicates = new ArrayList<>();
         for (int i = 0; i < cards.size(); i++) {
             Card card = cards.get(i);
 
-            // ✅ CRITICAL FIX: Skip the position that's already revealed
+            //  Skip the position that's already revealed
             if (i == excludePosition) {
                 continue;
             }

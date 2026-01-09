@@ -6,15 +6,7 @@ import enums.GameMode;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Main game manager for Trio_UTBM.
- * Supports TWO modes:
- * 1. FLEXIBLE: Select 3 cards, validate, remove (old system)
- * 2. REVEALING: Reveal cards one by one (new Trio game system)
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 4.0 - Revealing system + Flexible system
- */
+
 public class Game {
     private List<Student> students;
     private List<Team> teams;
@@ -26,13 +18,11 @@ public class Game {
     private Difficulty difficulty;
     private int numberOfPlayers;
 
-    // NEW: Revealing system state
+
     private RevealState currentRevealState;
     private boolean isRevealingMode = true; // TRUE = revealing mode, FALSE = flexible mode
 
-    /**
-     * Constructor for Game
-     */
+
     public Game() {
         this.students = new ArrayList<>();
         this.teams = new ArrayList<>();
@@ -41,11 +31,9 @@ public class Game {
         this.currentRevealState = new RevealState();
     }
 
-    /**
-     * Configure the game with players and settings
-     */
+
     public void configure(int numPlayers, GameMode mode, Difficulty difficulty, List<String> playerNames) {
-        // ✅ CRITICAL: Clear any previous game state before starting new game
+        //  CRITICAL: Clear any previous game state before starting new game
         this.students.clear();
         this.teams.clear();
         this.lectureHall = new LectureHall();
@@ -82,11 +70,7 @@ public class Game {
         }
     }
 
-    /**
-     * Initialize the game - create deck, shuffle, and deal cards
-     * TEAM MODE: All cards distributed to players, NO lecture hall
-     * INDIVIDUAL MODE: Cards to players + lecture hall
-     */
+
     public void initialize() {
         deck = new Deck(difficulty);
         System.out.println("=== INITIALIZE DEBUG ===");
@@ -100,7 +84,7 @@ public class Game {
         int cardsPerPlayer;
         int lectureHallSize;
 
-        // ✅ TEAM MODE: All 36 cards distributed to players, NO lecture hall
+        // TEAM MODE: All 36 cards distributed to players, NO lecture hall
         if (gameMode.isTeamMode()) {
             // Team mode: Divide all cards among players
             cardsPerPlayer = 36 / numberOfPlayers; // Example: 6 players = 6 cards each
@@ -149,7 +133,7 @@ public class Game {
 
         System.out.println("After dealing to players, deck has: " + deck.getRemainingCount());
 
-        // ✅ Deal to lecture hall ONLY in individual mode
+        //  Deal to lecture hall ONLY in individual mode
         if (!gameMode.isTeamMode()) {
             for (int i = 0; i < lectureHallSize; i++) {
                 Card card = deck.dealCard();
@@ -181,28 +165,7 @@ public class Game {
         System.out.println("System: " + (isRevealingMode ? "REVEALING" : "FLEXIBLE"));
     }
 
-    // ==================== REVEALING SYSTEM (NEW) ====================
 
-    /**
-     * NEW: Reveal a single card during turn
-     * @param currentPlayer The player revealing
-     * @param card The card to reveal
-     * @param source "hand", "other_player", "hall"
-     * @param playerName For other_player source
-     * @param position Position in hand/hall
-     * @return Result: "revealed", "mismatch", "trio_complete", "invalid"
-     */
-    /**
-     * NEW: Reveal a single card during turn
-     * ✅ FEATURE: Auto-reveals duplicates from the same player
-     *
-     * @param currentPlayer The player revealing
-     * @param card The card to reveal
-     * @param source "hand", "other_player", "hall"
-     * @param playerName For other_player source
-     * @param position Position in hand/hall
-     * @return Result: "revealed", "mismatch", "trio_complete", "invalid", "auto_reveal"
-     */
     public String revealCard(Student currentPlayer, Card card, String source, String playerName, int position) {
 
         int revealCountBefore = currentRevealState.getRevealCount();
@@ -273,8 +236,7 @@ public class Game {
 
 
 
-    /**
-     * Validate that a reveal is legal
+    /* Validate that a reveal is legal
      */
     private boolean validateReveal(Student currentPlayer,
                                    Card card,
@@ -290,13 +252,11 @@ public class Game {
                 return false;
             }
 
-            // ✅ IMPORTANT FIX:
-            // Always allow revealing from own hand.
-            // Matching / mismatch is handled AFTER reveal, not here.
+
             return true;
         }
 
-        // ===== REVEAL FROM OTHER PLAYER =====
+        // REVEAL FROM OTHER PLAYER
         else if (source.equals("other_player")) {
 
             // Cannot reveal from yourself as other_player
@@ -316,7 +276,7 @@ public class Game {
             return firstLast.contains(position);
         }
 
-        // ===== REVEAL FROM LECTURE HALL =====
+        // REVEAL FROM LECTURE HALL
         else if (source.equals("hall")) {
 
             return lectureHall.contains(card);
@@ -327,9 +287,7 @@ public class Game {
 
 
 
-    /**
-     * Complete a trio after 3 cards revealed
-     * Called by GUI after "trio_complete" result
+    /* Complete a trio after 3 cards revealed
      */
     public boolean completeRevealedTrio(Student currentPlayer) {
         if (currentRevealState.getRevealCount() != 3 || !currentRevealState.isValidTrio()) {
@@ -360,7 +318,7 @@ public class Game {
         }
 
         // Remove cards from sources
-        // ✅ CRITICAL FIX: Group by player, then remove in reverse position order
+        //   Group by player, then remove in reverse position order
         List<Student> playersToRefill = new ArrayList<>();
         playersToRefill.add(currentPlayer);
 
@@ -439,39 +397,28 @@ public class Game {
         return true; // Bonus turn! Don't advance turn
     }
 
-    /**
-     * Handle mismatch - flip cards back and end turn
-     * Called by GUI after "mismatch" result
+    /*Handle mismatch - flip cards back and end turn
      */
     public void handleMismatch() {
         currentRevealState.clear();
         turnManager.nextTurn(); // Advance to next player
     }
 
-    /**
-     * Get current reveal state (for GUI display)
+    /* Get current reveal state (for GUI display)
      */
     public RevealState getRevealState() {
         return currentRevealState;
     }
 
-    /**
-     * Clear reveal state (for ending turn early or errors)
+    /*Clear reveal state (for ending turn early or errors)
      */
     public void clearRevealState() {
         currentRevealState.clear();
     }
 
-    // ==================== FLEXIBLE SYSTEM (OLD) ====================
+    //  FLEXIBLE SYSTEM (OLD)
 
-    /**
-     * FLEXIBLE: Play turn by selecting 3 cards at once
-     * @param currentPlayer The player making the move
-     * @param selectedCards The 3 cards (from anywhere)
-     * @param sources Array of sources: "hand", "other_player", "hall"
-     * @param playerNames Array of player names (for other_player sources)
-     * @return true if valid trio
-     */
+
     public boolean playFlexibleTurn(Student currentPlayer, List<Card> selectedCards,
                                     String[] sources, String[] playerNames) {
         if (selectedCards == null || selectedCards.size() != 3) {
@@ -562,7 +509,7 @@ public class Game {
         return false;
     }
 
-    // ==================== SHARED METHODS ====================
+    // SHARED METHODS
 
     /**
      * Find student by name
@@ -584,8 +531,7 @@ public class Game {
         return students.get(neighborIndex);
     }
 
-    /**
-     * LEGACY: Play turn with specific player (backward compatibility)
+    /*LEGACY: Play turn with specific player (backward compatibility)
      */
     public boolean playTurnWithPlayer(Student student, Student otherPlayer, List<Card> selectedCards) {
         String[] sources = {"hand", "other_player", "hall"};
@@ -593,8 +539,7 @@ public class Game {
         return playFlexibleTurn(student, selectedCards, sources, playerNames);
     }
 
-    /**
-     * LEGACY: Play turn with neighbor (backward compatibility)
+    /*LEGACY: Play turn with neighbor (backward compatibility)
      */
     public boolean playTurn(Student student, List<Card> selectedCards) {
         Student neighbor = getNeighbor(student);
@@ -606,7 +551,7 @@ public class Game {
     }
 
     private void refillLectureHall() {
-        // ✅ TEAM MODE: No lecture hall, skip refill
+        //  TEAM MODE: No lecture hall, skip refill
         if (gameMode.isTeamMode()) {
             return; // No lecture hall in team mode
         }
@@ -639,7 +584,7 @@ public class Game {
     private void refillPlayerHand(Student student) {
         int targetSize;
 
-        // ✅ TEAM MODE: All cards distributed among players (36 / numPlayers)
+        // TEAM MODE: All cards distributed among players (36 / numPlayers)
         if (gameMode.isTeamMode()) {
             targetSize = 36 / numberOfPlayers; // Example: 6 players = 6 cards each
         } else {
@@ -671,13 +616,12 @@ public class Game {
         }
     }
 
-    /**
-     * Check victory conditions
-     * Simple mode: 3 trios OR trio of 7 (PFE)
-     * Advanced mode (Picante): 2 linked trios OR trio of 7 (PFE)
-     *
-     * INDIVIDUAL MODE: Check each student
-     * TEAM MODE: Check team totals (all members' trios combined)
+    /*
+      Check victory conditions
+      Simple mode: 3 trios OR trio of 7 (PFE)
+      Advanced mode (Picante): 2 linked trios OR trio of 7 (PFE)
+      INDIVIDUAL MODE: Check each student
+      TEAM MODE: Check team totals (all members' trios combined)
      */
     public Student checkVictoryConditions() {
         if (!gameMode.isTeamMode()) {
@@ -787,7 +731,7 @@ public class Game {
         }
     }
 
-    // ==================== GETTERS/SETTERS ====================
+    // GETTERS/SETTERS
 
     public List<Student> getStudents() {
         return new ArrayList<>(students);

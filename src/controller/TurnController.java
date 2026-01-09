@@ -5,32 +5,19 @@ import enums.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Handles the execution of individual turns.
- * Manages card selection, trio formation, and turn progression.
- *
- * @author Dana SLEIMAN
- * @version 1.0
- */
+
 public class TurnController {
     private Game game;
 
-    /**
-     * Constructor for TurnController
-     * @param game The game instance
-     */
+
     public TurnController(Game game) {
         this.game = game;
     }
 
-    /**
-     * Execute a turn with selected cards
-     * @param cardIndices Array of 3 indices: [handIndex1, handIndex2, hallIndex]
-     * @return true if turn was successful
-     */
+
     public boolean executeTurn(int[] cardIndices) {
         if (cardIndices == null || cardIndices.length != 3) {
-            System.out.println("❌ Error: Must select exactly 3 cards");
+            System.out.println(" Error: Must select exactly 3 cards");
             return false;
         }
 
@@ -52,7 +39,7 @@ public class TurnController {
         Card hallCard = game.getLectureHall().getCard(hallIndex);
 
         if (handCard1 == null || handCard2 == null || hallCard == null) {
-            System.out.println("❌ Error: Invalid card selection");
+            System.out.println(" Error: Invalid card selection");
             return false;
         }
 
@@ -63,7 +50,7 @@ public class TurnController {
         selectedCards.add(hallCard);
 
         // Display selection
-        System.out.println("\n📋 Selected cards:");
+        System.out.println("\n Selected cards:");
         System.out.println("  From hand: " + handCard1.getCourseCode() + ", " + handCard2.getCourseCode());
         System.out.println("  From hall: " + hallCard.getCourseCode());
 
@@ -71,10 +58,10 @@ public class TurnController {
         boolean success = game.playTurn(currentPlayer, selectedCards);
 
         if (success) {
-            System.out.println("✅ Valid trio! Turn successful!");
+            System.out.println(" Valid trio! Turn successful!");
             // Player gets bonus turn, don't advance
         } else {
-            System.out.println("❌ Invalid trio. Turn passes to next player.");
+            System.out.println(" Invalid trio. Turn passes to next player.");
             advanceTurn();
         }
 
@@ -93,22 +80,22 @@ public class TurnController {
         // Validate hand indices
         int handSize = player.getHand().getSize();
         if (handIndex1 < 0 || handIndex1 >= handSize) {
-            System.out.println("❌ Error: Hand index 1 out of range (0-" + (handSize-1) + ")");
+            System.out.println(" Error: Hand index 1 out of range (0-" + (handSize-1) + ")");
             return false;
         }
         if (handIndex2 < 0 || handIndex2 >= handSize) {
-            System.out.println("❌ Error: Hand index 2 out of range (0-" + (handSize-1) + ")");
+            System.out.println(" Error: Hand index 2 out of range (0-" + (handSize-1) + ")");
             return false;
         }
         if (handIndex1 == handIndex2) {
-            System.out.println("❌ Error: Cannot select the same hand card twice");
+            System.out.println(" Error: Cannot select the same hand card twice");
             return false;
         }
 
         // Validate lecture hall index
         int hallSize = game.getLectureHall().getCardCount();
         if (hallIndex < 0 || hallIndex >= hallSize) {
-            System.out.println("❌ Error: Hall index out of range (0-" + (hallSize-1) + ")");
+            System.out.println(" Error: Hall index out of range (0-" + (hallSize-1) + ")");
             return false;
         }
 
@@ -122,7 +109,7 @@ public class TurnController {
         game.getTurnManager().nextTurn();
         Student nextPlayer = game.getTurnManager().getCurrentStudent();
 
-        System.out.println("\n🔄 Turn passed to: " + nextPlayer.getName());
+        System.out.println("\n Turn passed to: " + nextPlayer.getName());
         System.out.println("Round: " + game.getTurnManager().getRoundNumber());
     }
 
@@ -133,7 +120,7 @@ public class TurnController {
         Student currentPlayer = game.getTurnManager().getCurrentStudent();
         Hand hand = currentPlayer.getHand();
 
-        System.out.println("\n🤚 " + currentPlayer.getName() + "'s Hand:");
+        System.out.println("\n " + currentPlayer.getName() + "'s Hand:");
         List<Card> cards = hand.getAllCards();
         for (int i = 0; i < cards.size(); i++) {
             Card card = cards.get(i);
@@ -141,8 +128,8 @@ public class TurnController {
         }
     }
 
-    /**
-     * Display the lecture hall cards
+    /*
+      Display the lecture hall cards
      */
     public void displayLectureHall() {
         LectureHall hall = game.getLectureHall();
@@ -164,8 +151,8 @@ public class TurnController {
         System.out.println();
     }
 
-    /**
-     * Display current scores
+    /*
+      Display current scores
      */
     public void displayScores() {
         System.out.println("\n📊 Current Scores:");
@@ -189,9 +176,7 @@ public class TurnController {
         }
     }
 
-    /**
-     * Get a summary of the current turn state
-     * @return Turn state information
+    /* Get a summary of the current turn state
      */
     public String getTurnInfo() {
         Student currentPlayer = game.getTurnManager().getCurrentStudent();

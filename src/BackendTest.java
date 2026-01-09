@@ -5,13 +5,7 @@ import model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Backend Test for MEMORY GAME with ID system
- * Tests new rules: 1 from me + 1 from neighbor + 1 from hall
- *
- * @author Dana SLEIMAN
- * @version 2.0 - Memory Game Edition
- */
+
 public class BackendTest {
 
     public static void main(String[] args) {
@@ -48,11 +42,7 @@ public class BackendTest {
         System.out.println("\n════════════════════════════════════════");
         System.out.println("   BACKEND TEST COMPLETE");
         System.out.println("════════════════════════════════════════");
-        System.out.println("\n📊 SUMMARY:");
-        System.out.println("✅ = Working correctly");
-        System.out.println("❌ = Bug found");
-        System.out.println("⚠️  = Check manually");
-        System.out.println("\n🔧 Memory game backend ready for GUI!");
+        System.out.println("\n Memory game backend ready for GUI!");
     }
 
     private static void testCardIDSystem() {
@@ -64,27 +54,27 @@ public class BackendTest {
             Card pfe = new Card("PFE", enums.Branch.SPECIAL, 1);
 
             if (sy41.getId() == 12) {
-                System.out.println("✅ SY41 has ID: 12");
+                System.out.println(" SY41 has ID: 12");
             } else {
-                System.out.println("❌ SY41 ID wrong: " + sy41.getId());
+                System.out.println(" SY41 ID wrong: " + sy41.getId());
             }
 
             if (ia41.getId() == 11) {
-                System.out.println("✅ IA41 has ID: 11");
+                System.out.println(" IA41 has ID: 11");
             } else {
-                System.out.println("❌ IA41 ID wrong: " + ia41.getId());
+                System.out.println(" IA41 ID wrong: " + ia41.getId());
             }
 
             if (pfe.getId() == 1) {
-                System.out.println("✅ PFE has ID: 1");
+                System.out.println(" PFE has ID: 1");
             } else {
-                System.out.println("❌ PFE ID wrong: " + pfe.getId());
+                System.out.println(" PFE ID wrong: " + pfe.getId());
             }
 
-            System.out.println("✅ Card ID system working!");
+            System.out.println(" Card ID system working!");
 
         } catch (Exception e) {
-            System.out.println("❌ ERROR: " + e.getMessage());
+            System.out.println(" ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -123,13 +113,13 @@ public class BackendTest {
             }
 
             if (correctOrder) {
-                System.out.println("\n✅ Hand sorting works! (12 → 11 → 9 → 2 → 1)");
+                System.out.println("\n Hand sorting works! (12 → 11 → 9 → 2 → 1)");
             } else {
-                System.out.println("\n❌ Hand sorting broken!");
+                System.out.println("\n Hand sorting broken!");
             }
 
         } catch (Exception e) {
-            System.out.println("❌ ERROR: " + e.getMessage());
+            System.out.println(" ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -157,9 +147,9 @@ public class BackendTest {
                 boolean visible = hand.isCardVisible(i);
                 Card card = hand.getCard(i);
                 if (visible) {
-                    System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ") ✅ VISIBLE");
+                    System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ")  VISIBLE");
                 } else {
-                    System.out.println("  [" + i + "] [?] (hidden) ❌ HIDDEN");
+                    System.out.println("  [" + i + "] [?] (hidden)  HIDDEN");
                 }
             }
 
@@ -169,14 +159,14 @@ public class BackendTest {
             boolean middleHidden = !hand.isCardVisible(4); // Middle card should be hidden
 
             if (firstVisible && lastVisible && middleHidden) {
-                System.out.println("\n✅ Visibility system working!");
+                System.out.println("\n Visibility system working!");
                 System.out.println("   First (0) and Last (8) visible, middle hidden");
             } else {
-                System.out.println("\n❌ Visibility system broken!");
+                System.out.println("\n Visibility system broken!");
             }
 
         } catch (Exception e) {
-            System.out.println("❌ ERROR: " + e.getMessage());
+            System.out.println(" ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -218,13 +208,13 @@ public class BackendTest {
                             aliceNeighbor != null && aliceNeighbor.getName().equals("Dana");
 
             if (correct) {
-                System.out.println("\n✅ Neighbor system working correctly!");
+                System.out.println("\n Neighbor system working correctly!");
             } else {
-                System.out.println("\n❌ Neighbor system broken!");
+                System.out.println("\n Neighbor system broken!");
             }
 
         } catch (Exception e) {
-            System.out.println("❌ ERROR: " + e.getMessage());
+            System.out.println(" ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -240,18 +230,18 @@ public class BackendTest {
             boolean success = controller.initializeGame(3, GameMode.INDIVIDUAL_SIMPLE, Difficulty.SIMPLE, players);
 
             if (success) {
-                System.out.println("✅ Game initialized successfully");
+                System.out.println(" Game initialized successfully");
                 controller.startGame();
-                System.out.println("✅ Game started successfully");
+                System.out.println(" Game started successfully");
 
                 Student currentPlayer = controller.getCurrentPlayer();
                 Hand hand = currentPlayer.getHand();
                 LectureHall hall = controller.getGame().getLectureHall();
 
-                System.out.println("✅ Current player: " + currentPlayer.getName());
-                System.out.println("✅ Hand size: " + hand.getSize() + " cards (should be 9 for 3 players)");
-                System.out.println("✅ Lecture hall: " + hall.getCardCount() + " cards (should be 9 for 3 players)");
-                System.out.println("✅ Deck remaining: " + controller.getGame().getDeck().getRemainingCount() + " cards");
+                System.out.println(" Current player: " + currentPlayer.getName());
+                System.out.println(" Hand size: " + hand.getSize() + " cards (should be 9 for 3 players)");
+                System.out.println(" Lecture hall: " + hall.getCardCount() + " cards (should be 9 for 3 players)");
+                System.out.println(" Deck remaining: " + controller.getGame().getDeck().getRemainingCount() + " cards");
 
                 // Show hand with IDs
                 System.out.println("\n📋 Player's hand (sorted by ID):");
@@ -259,9 +249,9 @@ public class BackendTest {
                     Card card = hand.getCard(i);
                     boolean visible = hand.isCardVisible(i);
                     if (visible) {
-                        System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ") ✅");
+                        System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ") ");
                     } else {
-                        System.out.println("  [" + i + "] [?] ❌");
+                        System.out.println("  [" + i + "] [?] ");
                     }
                 }
 
@@ -274,31 +264,31 @@ public class BackendTest {
                         Card card = neighborHand.getCard(i);
                         boolean visible = neighborHand.isCardVisible(i);
                         if (visible) {
-                            System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ") ✅");
+                            System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ") ");
                         } else {
-                            System.out.println("  [" + i + "] [?] ❌");
+                            System.out.println("  [" + i + "] [?] ");
                         }
                     }
                 }
 
                 // Show lecture hall (all visible)
-                System.out.println("\n🏫 Lecture Hall (all visible):");
+                System.out.println("\n Lecture Hall (all visible):");
                 for (int i = 0; i < hall.getCardCount(); i++) {
                     Card card = hall.getCard(i);
                     System.out.println("  [" + i + "] " + card.getCourseCode() + " (ID:" + card.getId() + ")");
                 }
 
-                System.out.println("\n✅ Memory game initialization complete!");
+                System.out.println("\n Memory game initialization complete!");
                 System.out.println("   Players can see:");
                 System.out.println("   - Own hand: first & last cards only");
                 System.out.println("   - Neighbor's hand: first & last cards only");
                 System.out.println("   - Lecture hall: all cards");
 
             } else {
-                System.out.println("❌ Game initialization FAILED");
+                System.out.println(" Game initialization FAILED");
             }
         } catch (Exception e) {
-            System.out.println("❌ ERROR: " + e.getMessage());
+            System.out.println(" ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }

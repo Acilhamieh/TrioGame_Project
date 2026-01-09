@@ -5,13 +5,7 @@ import enums.*;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Visual test for individual GUI components - MEMORY GAME VERSION
- * Shows each component in isolation
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 2.0 - Memory game compatible
- */
+
 public class GUIComponentTest {
 
     public static void main(String[] args) {
@@ -23,9 +17,8 @@ public class GUIComponentTest {
         });
     }
 
-    /**
-     * Test CardComponent display - VISIBLE cards
-     */
+    //Test CardComponent display - VISIBLE cards
+
     private static void testCardComponent() {
         JFrame frame = new JFrame("Card Component Test - Visible Cards");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -69,9 +62,8 @@ public class GUIComponentTest {
         System.out.println("✓ Card Component Test (Visible): Try clicking cards!");
     }
 
-    /**
-     * Test CardComponent with HIDDEN cards
-     */
+    //Test CardComponent with HIDDEN cards
+
     private static void testCardComponentWithVisibility() {
         JFrame frame = new JFrame("Card Component Test - Memory Game (Hidden Cards)");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -118,9 +110,8 @@ public class GUIComponentTest {
         System.out.println("✓ Card Component Test (Hidden): See memory game visibility!");
     }
 
-    /**
-     * Test MessagePanel
-     */
+    //Test MessagePanel
+
     private static void testMessagePanel() {
         JFrame frame = new JFrame("Message Panel Test");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

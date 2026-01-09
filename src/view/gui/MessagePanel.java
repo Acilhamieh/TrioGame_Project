@@ -3,20 +3,12 @@ package view.gui;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Panel displaying game messages and feedback.
- * Shows success, error, and informational messages.
- *
- * @author Acil HAMIEH
- * @version 1.0
- */
 public class MessagePanel extends JPanel {
     private JLabel messageLabel;
     private MessageType currentType;
 
-    /**
-     * Message types with associated colors
-     */
+    //Message types with associated colors
+
     public enum MessageType {
         INFO(new Color(70, 130, 180), Color.WHITE),      // Steel Blue
         SUCCESS(new Color(34, 139, 34), Color.WHITE),    // Forest Green
@@ -40,9 +32,8 @@ public class MessagePanel extends JPanel {
         }
     }
 
-    /**
-     * Constructor for MessagePanel
-     */
+    //Constructor for MessagePanel
+
     public MessagePanel() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(0, 100));
@@ -58,9 +49,8 @@ public class MessagePanel extends JPanel {
         setMessage("Select 3 cards to form a trio", MessageType.INFO);
     }
 
-    /**
-     * Create components
-     */
+    //create components
+
     private void createComponents() {
         messageLabel = new JLabel("", SwingConstants.CENTER);
         messageLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -73,11 +63,8 @@ public class MessagePanel extends JPanel {
         add(messageLabel, BorderLayout.CENTER);
     }
 
-    /**
-     * Set message with type
-     * @param message Message text
-     * @param type Message type
-     */
+    //Set message with type
+
     public void setMessage(String message, MessageType type) {
         currentType = type;
 
@@ -92,28 +79,19 @@ public class MessagePanel extends JPanel {
         repaint();
     }
 
-    /**
-     * Set message with default INFO type
-     * @param message Message text
-     */
+    //Set message with default INFO type
+
     public void setMessage(String message) {
         setMessage(message, MessageType.INFO);
     }
 
-    /**
-     * Clear message
-     */
+    //Clear message
+
     public void clearMessage() {
         messageLabel.setText("");
         messageLabel.setBackground(Color.WHITE);
     }
 
-    /**
-     * Show temporary message that auto-clears
-     * @param message Message text
-     * @param type Message type
-     * @param durationMs Duration in milliseconds
-     */
     public void showTemporaryMessage(String message, MessageType type, int durationMs) {
         setMessage(message, type);
 

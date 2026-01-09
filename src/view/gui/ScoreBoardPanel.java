@@ -5,21 +5,13 @@ import model.*;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Panel displaying current scores and standings.
- * Shows ECTS credits and trio counts for all players.
- *
- * @author Acil HAMIEH
- * @version 1.0
- */
+
 public class ScoreBoardPanel extends JPanel {
     private GameController gameController;
     private JTextArea scoreText;
 
-    /**
-     * Constructor for ScoreBoardPanel
-     * @param gameController Game controller
-     */
+    //Constructor for ScoreBoardPanel
+
     public ScoreBoardPanel(GameController gameController) {
         this.gameController = gameController;
 
@@ -37,9 +29,6 @@ public class ScoreBoardPanel extends JPanel {
         updateDisplay();
     }
 
-    /**
-     * Create components
-     */
     private void createComponents() {
         scoreText = new JTextArea();
         scoreText.setEditable(false);
@@ -53,9 +42,7 @@ public class ScoreBoardPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    /**
-     * Update score display
-     */
+
     public void updateDisplay() {
         StringBuilder scores = new StringBuilder();
         Game game = gameController.getGame();

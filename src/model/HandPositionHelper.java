@@ -3,23 +3,9 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Helper class to determine which card positions can be revealed.
- * Rules: First card + consecutive duplicates, OR Last card + consecutive duplicates from end
- *
- * Example: Hand [2, 2, 2, 5, 7]
- * - Can reveal: positions 0,1,2 (all three 2's) OR position 4 (the 7)
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 1.0 - First/Last + Duplicates logic
- */
 public class HandPositionHelper {
 
-    /**
-     * Get all positions that can be revealed from a hand
-     * @param hand The player's hand
-     * @return List of revealable positions
-     */
+
     public static List<Integer> getRevealablePositions(Hand hand) {
         List<Integer> positions = new ArrayList<>();
         List<Card> cards = hand.getAllCards();
@@ -62,22 +48,15 @@ public class HandPositionHelper {
         return positions;
     }
 
-    /**
-     * Check if a specific position can be revealed
-     * @param hand The player's hand
-     * @param position The position to check
-     * @return true if position can be revealed
-     */
+    //Check if a specific position can be revealed
+
     public static boolean canRevealPosition(Hand hand, int position) {
         List<Integer> revealable = getRevealablePositions(hand);
         return revealable.contains(position);
     }
 
-    /**
-     * Get first revealable positions (for other players - only first or last)
-     * @param hand The player's hand
-     * @return List containing only first and last positions
-     */
+    //Get first revealable positions (for other players - only first or last)
+
     public static List<Integer> getFirstLastPositions(Hand hand) {
         List<Integer> positions = new ArrayList<>();
         List<Card> cards = hand.getAllCards();

@@ -3,20 +3,13 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tracks the state of revealed cards during a player's turn.
- * In the revealing game mode, players reveal cards one by one.
- *
- * @author Dana SLEIMAN, Acil HAMIEH
- * @version 2.0 - Added duplicate prevention
- */
+
 public class RevealState {
     private List<RevealedCard> revealedCards;
     private int maxReveals = 3;
 
-    /**
-     * Inner class to track a single revealed card
-     */
+    // Inner class to track a single revealed card
+
     public static class RevealedCard {
         public Card card;
         public String source; // "hand", "other_player", "hall"
@@ -31,29 +24,19 @@ public class RevealState {
         }
     }
 
-    /**
-     * Constructor
-     */
+
     public RevealState() {
         this.revealedCards = new ArrayList<>();
     }
 
-    /**
-     * Add a revealed card
-     * ✅ FIXED: Prevents revealing the same card (source + position) twice
-     *
-     * @param card The card
-     * @param source Source location
-     * @param playerName Player name (if from other player)
-     * @param position Position in hand/hall
-     * @return true if added successfully, false if duplicate or limit reached
-     */
+    //Add a revealed card Prevents revealing the same card (source + position) twice
+
     public boolean addReveal(Card card, String source, String playerName, int position) {
         if (revealedCards.size() >= maxReveals) {
             return false;
         }
 
-        // ✅ CRITICAL FIX: Check for duplicate (same source + position)
+        //  CRITICAL FIX: Check for duplicate (same source + position)
         for (RevealedCard existing : revealedCards) {
             // Check if same source
             if (!existing.source.equals(source)) {
@@ -83,26 +66,20 @@ public class RevealState {
         return true;
     }
 
-    /**
-     * Get all revealed cards
-     * @return List of revealed cards
-     */
+    // Get all revealed cards
+
     public List<RevealedCard> getRevealedCards() {
         return new ArrayList<>(revealedCards);
     }
 
-    /**
-     * Get number of revealed cards
-     * @return Count
-     */
+    //Get number of revealed cards
+
     public int getRevealCount() {
         return revealedCards.size();
     }
 
-    /**
-     * Check if all revealed cards match (form a trio)
-     * @return true if all cards have same course code
-     */
+    //Check if all revealed cards match (form a trio)
+
     public boolean isValidTrio() {
         if (revealedCards.size() != 3) {
             return false;
@@ -115,10 +92,8 @@ public class RevealState {
         return first.matches(second) && second.matches(third);
     }
 
-    /**
-     * Check if last two revealed cards are different
-     * @return true if mismatch detected
-     */
+    //Check if last two revealed cards are different
+
     public boolean hasMismatch() {
         if (revealedCards.size() < 2) {
             return false;
@@ -132,10 +107,8 @@ public class RevealState {
         return !last.matches(secondLast);
     }
 
-    /**
-     * Get the last revealed card
-     * @return Last card or null
-     */
+    // Get the last revealed card
+
     public RevealedCard getLastRevealed() {
         if (revealedCards.isEmpty()) {
             return null;
@@ -143,25 +116,20 @@ public class RevealState {
         return revealedCards.get(revealedCards.size() - 1);
     }
 
-    /**
-     * Clear all revealed cards
-     */
+    //Clear all revealed cards
+
     public void clear() {
         revealedCards.clear();
     }
 
-    /**
-     * Check if can reveal more cards
-     * @return true if less than 3 cards revealed
-     */
+    //check if can reveal more cards
+
     public boolean canRevealMore() {
         return revealedCards.size() < maxReveals;
     }
 
-    /**
-     * Get course code of revealed cards (for display)
-     * @return Course code or null
-     */
+    //Get course code of revealed cards (for display)
+
     public String getRevealedCourseCode() {
         if (revealedCards.isEmpty()) {
             return null;

@@ -6,13 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Main window for the Trio_UTBM GUI - REVEALING GAME VERSION.
- * Contains all GUI panels and manages the overall interface.
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 3.0 - Fixed: Creates new GameController for each game
- */
+
 public class MainWindow extends JFrame {
     private GameController gameController;
     private CardLayout cardLayout;
@@ -25,9 +19,7 @@ public class MainWindow extends JFrame {
     // Constants
     private static final String TITLE = "Trio_UTBM - Revealing Game Edition!";
 
-    /**
-     * Constructor for MainWindow
-     */
+
     public MainWindow() {
         this.gameController = new GameController();
 
@@ -38,9 +30,8 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    /**
-     * Initialize window properties - RESPONSIVE
-     */
+    //Initialize window properties - RESPONSIVE
+
     private void initializeWindow() {
         setTitle(TITLE);
 
@@ -56,9 +47,8 @@ public class MainWindow extends JFrame {
         setMinimumSize(new Dimension(1000, 650)); // Minimum size for playability
     }
 
-    /**
-     * Create all panels
-     */
+    //Create all panels
+
     private void createPanels() {
         // Create menu panel
         menuPanel = new MenuPanel(this);
@@ -67,9 +57,8 @@ public class MainWindow extends JFrame {
         gamePanel = null;
     }
 
-    /**
-     * Setup layout with CardLayout for switching between panels
-     */
+    //Setup layout with CardLayout for switching between panels
+
     private void setupLayout() {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -83,23 +72,15 @@ public class MainWindow extends JFrame {
         showMenu();
     }
 
-    /**
-     * Show the menu panel
-     */
+    //Show the menu panel
+
     public void showMenu() {
         cardLayout.show(mainPanel, "MENU");
     }
 
-    /**
-     * Start a new game with configuration
-     * ✅ FIXED: Creates NEW GameController for each game
-     * @param numPlayers Number of players
-     * @param mode Game mode
-     * @param difficulty Difficulty level
-     * @param playerNames List of player names
-     */
+
     public void startNewGame(int numPlayers, GameMode mode, Difficulty difficulty, List<String> playerNames) {
-        // ✅ CREATE NEW GAMECONTROLLER FOR EACH GAME
+        // CREATE NEW GAMECONTROLLER FOR EACH GAME
         // This ensures we start with a fresh Game object (0 cards, no old state)
         this.gameController = new GameController();
 
@@ -133,9 +114,8 @@ public class MainWindow extends JFrame {
         }
     }
 
-    /**
-     * End current game and return to menu
-     */
+    //End current game and return to menu
+
     public void endGame() {
         int choice = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to quit this game?",
@@ -157,17 +137,13 @@ public class MainWindow extends JFrame {
         }
     }
 
-    /**
-     * Get the game controller
-     * @return Game controller instance
-     */
+    // Get the game controller
+
     public GameController getGameController() {
         return gameController;
     }
 
-    /**
-     * Show rules dialog - UPDATED FOR REVEALING GAME
-     */
+
     public void showRules() {
         String rules = "🎓 TRIO_UTBM - REVEALING GAME RULES\n\n" +
                 "🎯 OBJECTIVE:\n" +
@@ -221,9 +197,7 @@ public class MainWindow extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Show about dialog
-     */
+
     public void showAbout() {
         String about = "🎓 TRIO_UTBM - REVEALING GAME EDITION\n\n" +
                 "A revealing card game about graduating from UTBM!\n\n" +
@@ -247,10 +221,8 @@ public class MainWindow extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Main entry point for GUI version
-     * @param args Command line arguments
-     */
+    //Main entry point for GUI version
+
     public static void main(String[] args) {
         // Set system look and feel
         try {

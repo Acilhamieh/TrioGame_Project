@@ -3,25 +3,14 @@ package model;
 import enums.Branch;
 import enums.GameMode;
 
-/**
- * Represents a trio of three matching cards in Trio_UTBM.
- * A valid trio earns ECTS credits for the student/team.
- *
- * @author Dana SLEIMAN
- * @version 2.0 - FIXED: Removed cached branch, getBranch() returns actual card branch
- */
+
 public class Trio {
     private Card card1;
     private Card card2;
     private Card card3;
     private int ectsAwarded;
 
-    /**
-     * Constructor for a trio
-     * @param card1 First card
-     * @param card2 Second card
-     * @param card3 Third card
-     */
+
     public Trio(Card card1, Card card2, Card card3) {
         this.card1 = card1;
         this.card2 = card2;
@@ -29,19 +18,12 @@ public class Trio {
         this.ectsAwarded = 0;
     }
 
-    /**
-     * Check if this trio is valid (all three cards match)
-     * @return true if all cards have the same course code
-     */
+    // Check if this trio is valid (all three cards match)
+
     public boolean isValid() {
         return card1.equals(card2) && card2.equals(card3);
     }
 
-    /**
-     * Check if this trio is valid for the specified game mode
-     * @param mode The game mode being played
-     * @return true if trio meets mode requirements
-     */
     public boolean isValidForMode(GameMode mode) {
         // First check basic validity (3 matching cards)
         if (!isValid()) {
@@ -60,19 +42,14 @@ public class Trio {
         return true;
     }
 
-    /**
-     * Check if this is a PFE trio (instant win)
-     * @return true if all three cards are PFE
-     */
+    //Check if this is a PFE trio (instant win)
+
     public boolean isPFETrio() {
         return card1.isPFE() && card2.isPFE() && card3.isPFE();
     }
 
-    /**
-     * Calculate ECTS credits for this trio based on game mode
-     * @param mode The game mode being played
-     * @return ECTS credits awarded (2, 3, or 6 for PFE)
-     */
+    //Calculate ECTS credits for this trio based on game mode
+
     public int calculateEcts(GameMode mode) {
         if (isPFETrio()) {
             this.ectsAwarded = 6; // PFE trio = instant graduation
@@ -88,44 +65,31 @@ public class Trio {
         return 0;
     }
 
-    /**
-     * Get the first card
-     * @return First card in trio
-     */
+    //Get the first card
+
     public Card getCard1() {
         return card1;
     }
 
-    /**
-     * Get the second card
-     * @return Second card in trio
-     */
+    //Get the second card
+
     public Card getCard2() {
         return card2;
     }
 
-    /**
-     * Get the third card
-     * @return Third card in trio
-     */
+    //Get the third card
+
     public Card getCard3() {
         return card3;
     }
 
-    /**
-     * Get the ECTS credits awarded for this trio
-     * @return ECTS credits
-     */
+    //Get the ECTS credits awarded for this trio
+
     public int getEctsAwarded() {
         return ectsAwarded;
     }
 
-    /**
-     * ✅ FIXED: Get the branch of this trio
-     * Returns the actual branch from the cards (not a cached value)
-     * All three cards in a valid trio have the same branch
-     * @return The branch of the trio cards
-     */
+
     public Branch getBranch() {
         // Return the actual branch from card1
         // (all three cards have same branch in a valid trio)

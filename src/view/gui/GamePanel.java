@@ -7,12 +7,7 @@ import javax.swing.Timer;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Main game panel with REVEALING SYSTEM + TEAM TRADING.
- *
- * @author Acil HAMIEH, Dana SLEIMAN
- * @version 5.3 - FINAL FIX: mismatch lock + single timer
- */
+
 public class GamePanel extends JPanel {
 
     private final MainWindow mainWindow;
@@ -31,7 +26,7 @@ public class GamePanel extends JPanel {
 
     private Timer flipBackTimer;
 
-    // ✅ CRITICAL FIX
+
     private boolean mismatchInProgress = false;
 
     public GamePanel(MainWindow mainWindow, GameController controller) {
@@ -126,7 +121,7 @@ public class GamePanel extends JPanel {
         Student current = controller.getCurrentPlayer();
         if (current == null) return;
 
-        mismatchInProgress = false; // ✅ reset lock
+        mismatchInProgress = false; //  reset lock
 
         playerLabel.setText("Player: " + current.getName());
         scoreLabel.setText("ECTS: " + current.getEctsCredits() + " | Trios: " + current.getTrioCount());
@@ -142,7 +137,7 @@ public class GamePanel extends JPanel {
         updateInstructionLabel();
     }
 
-    /* ================= CLICK HANDLERS ================= */
+
 
     public void onHandCardSelected(Card card, int position) {
         if (mismatchInProgress) return;
